@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Summarizer</title>
+  </head>
+  <body>
+    <form>
+      <div>
+        <label for="text">Text:</label>
+        <textarea id="text" name="text"></textarea>
+      </div>
+      <div>
+        <label for="num_sentences">Number of sentences:</label>
+        <input type="number" id="num_sentences" name="num_sentences" value="3">
+      </div>
+      <div>
+        <button type="button" onclick="sendRequest()">Summarize</button>
+      </div>
+    </form>
+    <div>
+      <h2>Summary:</h2>
+      <div id="summary"></div>
+    </div>
+    <script>
+      function sendRequest() {
+        const text = document.getElementById('text').value;
+        const numSentences = document.getElementById('num_sentences').value;
+        
+        fetch('/summarize', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({text: text, num_sentences: numSentences})
+        })
+        .then(response => response.text())
+        .then(summary => {
+          document.getElementById('summary').textContent = summary;
+        })
+        .catch(error => console.error(error));
+      }
+    </script>
+  </body>
+</html>
