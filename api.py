@@ -13,13 +13,16 @@ CORS(app)
 summaries = []
 counter = 1
 noteOpen = False
+abstractSum = pipeline("summarization", model="t5-base", tokenizer="t5-base", framework="tf")
+summarizer = Summarizer()
+
 
 @app.route('/summarize', methods=['POST'])
 def summarize():
+    global summarizer
     data = request.get_json()
     text = data['text']
     num_sentencess = int(request.args.get('num_sentences', 3))  
-    summarizer = Summarizer()
     summary = summarizer(text, num_sentences=num_sentencess)
     return jsonify({'summary': summary})
 
@@ -64,6 +67,7 @@ def delete_summary():
 
 @app.route('/abstract', methods=['POST'])
 def abstract():
+    global abstractSum
     data = request.get_json()
     text = data['text']
     word_count = len(text.split())
@@ -74,7 +78,6 @@ def abstract():
         max_lengthh = word_count
     if max_lengthh > word_count:
         max_lengthh = word_count
-    abstractSum = pipeline("summarization")
     summarys = abstractSum(text, min_length=min_lengthh, max_length=max_lengthh)
     summary = summarys[0]['summary_text']
     return jsonify({'summary': summary})
