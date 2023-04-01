@@ -1,12 +1,8 @@
 // ==UserScript==
-// @name         Abstract
-// @namespace    http://example.com
-// @version      2
+// @name         FYP
 // @description  Adds a collapsible side panel to web pages
 // @match        http://*/*
 // @match        https://*/*
-// @grant        GM_addStyle
-// @grant        GM_xmlhttpRequest
 // ==/UserScript==
 
 (function() {
@@ -53,10 +49,13 @@
   summarizeButton.classList.add('btn');
   panel.appendChild(summarizeButton);
   panel.appendChild(document.createElement("br"));
+  panel.appendChild(document.createElement("br"));
+
 
   var label = document.createElement("label");
   label.for = "num-sentences";
   label.innerText = "Number Of Sentences";
+  label.classList.add('label');
   panel.appendChild(label);
   panel.appendChild(document.createElement("br"));
 
@@ -65,12 +64,14 @@
   input.id = "num-sentences";
   input.min = "1";
   input.value = "1";
+  input.classList.add('inp');
   panel.appendChild(input);
 
   var minlabel = document.createElement("label");
   minlabel.for = "min-length";
   minlabel.innerText = "min words";
   minlabel.style.display = "none"; // hide 
+  minlabel.classList.add('label');
   panel.appendChild(minlabel);
 
   var minInput = document.createElement("input");
@@ -78,12 +79,14 @@
   minInput.id = "min-length";
   minInput.min = "1";
   minInput.value = "1";
+  minInput.classList.add('inp');
   minInput.style.display = "none"; // hide 
   panel.appendChild(minInput);
 
   var maxlabel = document.createElement("label");
   maxlabel.for = "max-length";
   maxlabel.innerText = "max words";
+  maxlabel.classList.add('label');
   maxlabel.style.display = "none"; // hide 
   panel.appendChild(maxlabel);
 
@@ -92,9 +95,11 @@
   maxInput.id = "max-length";
   maxInput.min = "10";
   maxInput.value = "10";
+  maxInput.classList.add('inp');
   maxInput.style.display = "none"; // hide 
   panel.appendChild(maxInput);
 
+  panel.appendChild(document.createElement("br"));
   panel.appendChild(document.createElement("br"));
   var advancedCheckbox = document.createElement("input");
   advancedCheckbox.type = "checkbox";
@@ -105,6 +110,7 @@
   var advancedLabel = document.createElement("label");
   advancedLabel.innerHTML = "Use Local Server";
   advancedLabel.for = "advancedCheckbox";
+  advancedLabel.classList.add('label');
   panel.appendChild(advancedLabel);
   panel.appendChild(document.createElement("br"));
   panel.appendChild(document.createElement("br"));
@@ -129,6 +135,7 @@
   var highlightLabel = document.createElement("label");
   highlightLabel.innerHTML = "Highlight Text Mode";
   highlightLabel.for = "highlightCheckbox";
+  highlightLabel.classList.add('label');
   panel.appendChild(highlightLabel);
   panel.appendChild(document.createElement("br"));
   panel.appendChild(document.createElement("br"));
@@ -137,10 +144,9 @@
   var abstractCheckbox = document.createElement("input");
   abstractCheckbox.type = "checkbox";
   abstractCheckbox.id = "abstractCheckbox";
-  abstractCheckbox.value = "highlight";
+  abstractCheckbox.value = "abstract";
   abstractCheckbox.addEventListener("click", function() {
     if (abstractCheckbox.checked) {
-      highlight = true;    
 			advancedCheckbox.checked = true; // check the advancedCheckbox
       input.style.display = "none"; // hide the input box
       label.style.display = "none"; // hide 
@@ -149,7 +155,6 @@
       minInput.style.display = "block"; // hide the summarize button
       maxInput.style.display = "block"; // hide the summarize button
     } else {
-      highlight = false;
       input.style.display = "block"; // hide the input box
       label.style.display = "block"; // hide the input box
       minlabel.style.display = "none"; // hide 
@@ -163,6 +168,7 @@
   var abstractLabel = document.createElement("label");
   abstractLabel.innerHTML = "Abstract Summirization";
   abstractLabel.for = "highlightCheckbox";
+  abstractLabel.classList.add('label');
   panel.appendChild(abstractLabel);
   panel.appendChild(document.createElement("br"));
   panel.appendChild(document.createElement("br"));
@@ -184,6 +190,7 @@
   var floatingLabel = document.createElement("label");
   floatingLabel.innerHTML = "Floating Sidebar";
   floatingLabel.for = "floatingCheckbox";
+  floatingLabel.classList.add('label');
   panel.appendChild(floatingLabel);
   panel.appendChild(document.createElement("br"));    
   panel.appendChild(document.createElement("br"));
@@ -459,17 +466,14 @@
       margin-right: 10px;
     }
 
-  input{
-
-   margin: auto !important;
-
-  }
-  label {
+  .label {
     font-weight: bold;
     padding: 20px;
     font-size: 16px;
   }
-
+  .inp {
+      margin: auto!important;
+  }
 
  .Sbtn { 
         font-size: 14px;
@@ -507,7 +511,7 @@
   panel.style.right = "0";
   wrapper.classList.add("side-panel-open");
   button.style.transition = "right 0.3s ease-in-out";
-  button.style.right = "calc(380px)";
+  button.style.right = "calc(400px)";
   button.removeEventListener('click', openNav); // remove the open event listener
   button.addEventListener('click', closeNav); // add the close event listener
     
@@ -660,9 +664,17 @@ function closeNav() {
   function localSummarize() {
       advancedCheckbox.checked = true; // check the advancedCheckbox
       document.getElementById("summary-analysis").innerHTML = '';
-      const abstractSummarize = document.getElementById("abstractCheckbox").checked;
       const input = document.getElementById("input").value;
       const data = JSON.stringify({ text: input });
+      const words = input.split(/\s+/).length;
+      console.log(words);
+      var abstractSummarize = document.getElementById("abstractCheckbox").checked;
+    	if(words>=800){
+			 if (abstractCheckbox.checked) {
+			  abstractCheckbox.click();
+       }
+        abstractSummarize=false;
+      }
       var url = ''
       if (abstractSummarize) {
       const numMin = document.getElementById("min-length").value;
@@ -718,6 +730,8 @@ function closeNav() {
   
       // Set the max attribute of the num-sentences input element to the maximum number of sentences allowed
       document.getElementById("num-sentences").max = maxSentences;
+      document.getElementById("max-length").max = maxSentences;
+      document.getElementById("min-length").max = maxSentences-1;
   }
   
 
