@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Collapsible Side Panel
+// @name         Abstract
 // @namespace    http://example.com
 // @version      2
 // @description  Adds a collapsible side panel to web pages
@@ -24,7 +24,9 @@
   var originalContent = document.body.innerHTML;
   document.body.innerHTML = ''; // Clear the original content
   container.innerHTML = originalContent;
+  container.style.marginRight = '20px';
   document.body.appendChild(container);
+  
 
   var wrapper = document.createElement("div");
   wrapper.classList.add("wrapper");
@@ -54,7 +56,7 @@
 
   var label = document.createElement("label");
   label.for = "num-sentences";
-  label.innerText = "roughly how many sentences summarised too";
+  label.innerText = "Number Of Sentences";
   panel.appendChild(label);
   panel.appendChild(document.createElement("br"));
 
@@ -64,8 +66,36 @@
   input.min = "1";
   input.value = "1";
   panel.appendChild(input);
-  panel.appendChild(document.createElement("br"));
 
+  var minlabel = document.createElement("label");
+  minlabel.for = "min-length";
+  minlabel.innerText = "min words";
+  minlabel.style.display = "none"; // hide 
+  panel.appendChild(minlabel);
+
+  var minInput = document.createElement("input");
+  minInput.type = "number";
+  minInput.id = "min-length";
+  minInput.min = "1";
+  minInput.value = "1";
+  minInput.style.display = "none"; // hide 
+  panel.appendChild(minInput);
+
+  var maxlabel = document.createElement("label");
+  maxlabel.for = "max-length";
+  maxlabel.innerText = "max words";
+  maxlabel.style.display = "none"; // hide 
+  panel.appendChild(maxlabel);
+
+  var maxInput = document.createElement("input");
+  maxInput.type = "number";
+  maxInput.id = "max-length";
+  maxInput.min = "10";
+  maxInput.value = "10";
+  maxInput.style.display = "none"; // hide 
+  panel.appendChild(maxInput);
+
+  panel.appendChild(document.createElement("br"));
   var advancedCheckbox = document.createElement("input");
   advancedCheckbox.type = "checkbox";
   advancedCheckbox.id = "advancedCheckbox";
@@ -73,7 +103,7 @@
   panel.appendChild(advancedCheckbox);
 
   var advancedLabel = document.createElement("label");
-  advancedLabel.innerHTML = "Use local summarization server";
+  advancedLabel.innerHTML = "Use Local Server";
   advancedLabel.for = "advancedCheckbox";
   panel.appendChild(advancedLabel);
   panel.appendChild(document.createElement("br"));
@@ -91,7 +121,7 @@
     } else {
       highlight = false;
       textarea.style.display = "block"; // show the input box
-      summarizeButton.style.display = "block"; // show the summarize button
+      summarizeButton.style.display = "initial"; // show the summarize button
     }
   });
   panel.appendChild(highlightCheckbox);
@@ -103,6 +133,40 @@
   panel.appendChild(document.createElement("br"));
   panel.appendChild(document.createElement("br"));
 
+  
+  var abstractCheckbox = document.createElement("input");
+  abstractCheckbox.type = "checkbox";
+  abstractCheckbox.id = "abstractCheckbox";
+  abstractCheckbox.value = "highlight";
+  abstractCheckbox.addEventListener("click", function() {
+    if (abstractCheckbox.checked) {
+      highlight = true;    
+			advancedCheckbox.checked = true; // check the advancedCheckbox
+      input.style.display = "none"; // hide the input box
+      label.style.display = "none"; // hide 
+      minlabel.style.display = "block"; // hide 
+      maxlabel.style.display = "block"; // hide 
+      minInput.style.display = "block"; // hide the summarize button
+      maxInput.style.display = "block"; // hide the summarize button
+    } else {
+      highlight = false;
+      input.style.display = "block"; // hide the input box
+      label.style.display = "block"; // hide the input box
+      minlabel.style.display = "none"; // hide 
+      maxlabel.style.display = "none"; // hide 
+      minInput.style.display = "none"; // hide the summarize button
+      maxInput.style.display = "none"; // hide the summarize button
+    }
+  });
+  panel.appendChild(abstractCheckbox);
+
+  var abstractLabel = document.createElement("label");
+  abstractLabel.innerHTML = "Abstract Summirization";
+  abstractLabel.for = "highlightCheckbox";
+  panel.appendChild(abstractLabel);
+  panel.appendChild(document.createElement("br"));
+  panel.appendChild(document.createElement("br"));
+  
   var floatingCheckbox = document.createElement("input");
   floatingCheckbox.type = "checkbox";
   floatingCheckbox.id = "floatingCheckbox";
@@ -139,6 +203,15 @@
   panel.appendChild(document.createElement("br"));    
   panel.appendChild(document.createElement("br"));
 
+  
+  var analysisButton = document.createElement('button');
+  analysisButton.classList.add('btn');
+  analysisButton.textContent = 'Analyize Summary';
+  analysisButton.addEventListener("click", analysis);
+  panel.appendChild(analysisButton);
+  panel.appendChild(document.createElement("br"));    
+  panel.appendChild(document.createElement("br"));
+  
   var copyButton = document.createElement("button");
   copyButton.id = "copy-button";
   copyButton.innerHTML = "&#x1F4CB; Copy";
@@ -152,6 +225,11 @@
   notesButton.addEventListener("click", notes);
   panel.appendChild(notesButton);
 
+  
+  var summaryAnalysis = document.createElement("p");
+  summaryAnalysis.id = "summary-analysis";
+  panel.appendChild(summaryAnalysis);
+  
   var summary = document.createElement("p");
   summary.id = "summary";
   summary.innerText = "summarized";
@@ -186,8 +264,8 @@
       font-size: 16px !important;
       font-family: Arial !important;
       top: 0;
-      right: -380px;
-      width: 300px;
+      right: -440px;
+      width: 380px;
       height: 100%;
       z-index: 9999;
       transition: right 0.3s ease-in-out;
@@ -199,13 +277,14 @@
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.35);
       overflow-y: scroll;
       resize: horizontal; /* added property for resizing */
+
   }
 
 
       .side-panel-toggle {
         position: fixed; 
         top: 50%;
-        right: 10px;
+        right: 0px;
         z-index: 9999;
         display: flex;
         color: #ffffff !important;
@@ -214,8 +293,8 @@
         border-radius: 5px;
         outline: none;
         cursor: pointer;
-        width: 40px !important;
-        height: 40px !important;
+        width: 35px !important;
+        height: 35px !important;
         padding: 0;
         transform: translateY(-50%);
         left: auto; /* reset the left property */
@@ -283,7 +362,7 @@
         border-radius: 10px;
         box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
         z-index: 999 !important;
-        background-color: yellow;
+        background-color: #fde74c;
         overflow-y: auto;
         color: black !important;
         z-index: 9999 !important;
@@ -305,6 +384,7 @@
     .btn:hover {
             background: #007960 !important;
      }
+
       .stickyNoteBtn {
         font-size: 14px;
         font-weight: bold;
@@ -329,7 +409,6 @@
       height: 100%;
       padding: 10px;
       box-sizing: border-box;
-      background-color: yellow;
       font-size: 16px !important;
       font-family: Arial !important;
       font-weight: bold !important;
@@ -351,12 +430,13 @@
     position: absolute;
     bottom: 5px;
     right: 5px;
-    padding: px;
+    font-size: 15px;
+    padding: 5px;
     font-weight: bold !important;
     color: black !important;
-    background-color: #bbb !important;;
+    background-color: #e5e9ec !important;
     border: none;
-    border-radius: 5px;
+    border-radius: 2px;
     cursor: pointer;
 
     }
@@ -379,13 +459,42 @@
       margin-right: 10px;
     }
 
-    .copy-btn {
-      background-color: lightblue;
-      border: none;
-      border-radius: 5px;
-      padding: 5px;
-      cursor: pointer;
-    }
+  input{
+
+   margin: auto !important;
+
+  }
+  label {
+    font-weight: bold;
+    padding: 20px;
+    font-size: 16px;
+  }
+
+
+ .Sbtn { 
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        background-color: #5b7c99;
+        color: #fff;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: background-color 0.3s ease; 
+    } 
+    .Sbtn:hover {
+            background: #007960 !important;
+     }
+ 
+      .wrapper{
+      text-align: center!important;
+     display: block !important;
+      justify-content: center !important;
+      align-items: center !important;
+			margin-left: auto;
+      margin-right: auto;
+     }
 
 `;
     document.head.appendChild(css);
@@ -393,12 +502,12 @@
 
   function openNav() {  
     if(!floating){
-    container.style.marginRight = '340px';
+    container.style.marginRight = '410px';
   }
   panel.style.right = "0";
   wrapper.classList.add("side-panel-open");
   button.style.transition = "right 0.3s ease-in-out";
-  button.style.right = "calc(340px)";
+  button.style.right = "calc(380px)";
   button.removeEventListener('click', openNav); // remove the open event listener
   button.addEventListener('click', closeNav); // add the close event listener
     
@@ -406,10 +515,11 @@
 
 function closeNav() {
   container.style.marginRight = '0';
-  panel.style.right = "-380px";
+  container.style.marginRight = '20px';
+  panel.style.right = "-440px";
   wrapper.classList.remove("side-panel-open");
   button.style.transition = "right 0.3s ease-in-out";
-  button.style.right = "40px";
+  button.style.right = "0";
   button.removeEventListener('click', closeNav); // remove the close event listener
   button.addEventListener('click', openNav); // add the open event listener back
 }
@@ -449,6 +559,37 @@ function closeNav() {
       }
   });
   
+   function analysis() {
+    const input = document.getElementById("summary").innerText;
+    console.log(input);
+    const data = JSON.stringify({ text: input });
+    const url = `http://localhost:5000/analysis?`;
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", url);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.onload = function () {
+      if (xhr.status === 200) {
+        const response = JSON.parse(xhr.responseText);
+        console.log(response);
+        const sentiment_polarity = response.sentiment_polarity;
+        const emotion = response.emotion;
+        const entities = Array.isArray(response.entities) ? response.entities.join(", ") : response.entities;
+        let pos_tags = "";
+            for (let i = 0; i < response.pos_tags.length; i++) {
+                pos_tags += `[${response.pos_tags[i][0]}:${response.pos_tags[i][1]}] `;
+            }
+            const analysis = `Sentiment polarity: ${sentiment_polarity}<br>Emotion: ${emotion}<br>Entities: ${entities}<br>POS tags: ${pos_tags}<br>`;
+         document.getElementById("summary-analysis").innerHTML = analysis;
+      } else {
+        console.error("Error:", xhr.statusText);
+      }
+    };
+    xhr.onerror = function () {
+      console.error("Error:", xhr.statusText);
+    };
+    xhr.send(data);
+}
+
      function notes(){
                  console.log('hi');
 
@@ -477,17 +618,22 @@ function closeNav() {
     }
     document.getElementById("input").value = text;
     var advancedSummarize = document.getElementById("advancedCheckbox").checked;
-    if (advancedSummarize) {
-      console.log('local');
-      localSummarize();
-    } else {
-      console.log('cloud');
-      summarize();
-    }
+
+      // summarize the page content using the appropriate function
+      if (advancedSummarize) {
+        console.log('local');
+          localSummarize();
+      } else {
+        console.log('cloud');
+          summarize();
+      }
   }
     
     function summarize() {
+      document.getElementById("summary-analysis").innerHTML = '';
       const input = document.getElementById("input").value;
+      const numLines = input.split("\n").length;
+      if(numLines<=119){
       const num_sentences = document.getElementById("num-sentences").value;
       const req = new XMLHttpRequest();
       req.open(
@@ -498,21 +644,34 @@ function closeNav() {
       const blob = new Blob([JSON.stringify(input)], { type: "application/json" });
       req.send(blob);
       const response = JSON.parse(req.response);
-      const summary = response["summary"].replace("\\n", "\n").replace(/^"/, "");
+      var summary = response["summary"].replace("\\n", "\n").replace(/^"/, "");
       document.getElementById("summary").innerText = summary.trim();
       const word_count = summary.split(/\s+/).length;
       const sentence_count = summary.split(/[.?!]+/).filter(Boolean).length;
       const input_word_count = input.split(" ").length;
       const percent_reduction = Math.round((1 - word_count / input_word_count) * 100);
       document.getElementById("summary-count").innerHTML = `(${word_count} words, ${sentence_count} sentences, Text reduced by ${percent_reduction}% (${input_word_count} to ${word_count}))<br><br><br>`;
+    }else{
+      localSummarize();
     }
+  
+  }
 
   function localSummarize() {
+      advancedCheckbox.checked = true; // check the advancedCheckbox
+      document.getElementById("summary-analysis").innerHTML = '';
+      const abstractSummarize = document.getElementById("abstractCheckbox").checked;
       const input = document.getElementById("input").value;
-      const numSentences = document.getElementById("num-sentences").value;
-      const url = `http://localhost:5000/summarize?num_sentences=${numSentences}`;
       const data = JSON.stringify({ text: input });
-    
+      var url = ''
+      if (abstractSummarize) {
+      const numMin = document.getElementById("min-length").value;
+      const numMax = document.getElementById("max-length").value;
+       url = `http://localhost:5000/abstract?min_length=${numMin}&max_length=${numMax}`;
+    }else{
+      const numSentences = document.getElementById("num-sentences").value;
+       url = `http://localhost:5000/summarize?num_sentences=${numSentences}`;
+    } 
       const xhr = new XMLHttpRequest();
       xhr.open("POST", url);
       xhr.setRequestHeader("Content-Type", "application/json");
@@ -543,7 +702,8 @@ function closeNav() {
       const input = document.getElementById("input").value;
       const word_count = input.split(" ").length;
       const sentence_count = input.split(/[.?!]+/).filter(Boolean).length;
-      document.getElementById("word-count").innerHTML = `(${word_count} words, ${sentence_count} sentences)`;
+      const numLines = input.split("\n").length;
+      document.getElementById("word-count").innerHTML = `(${word_count} words, ${sentence_count} sentences, ${numLines} lines)`;
   
       // Get the input element and the maximum number of sentences allowed
       const inputElement = document.getElementById("input");
@@ -668,7 +828,7 @@ function get() {
         summaryText.textContent = summary;
         
         var copyBtn = document.createElement('button');
-        copyBtn.classList.add('copy-btn');
+        copyBtn.classList.add('Sbtn');
         copyBtn.textContent = 'Copy';
         copyBtn.addEventListener('click', function() {
           // Get the text within the summary element
@@ -691,7 +851,7 @@ function get() {
         });
         
         var removeBtn = document.createElement('button');
-        removeBtn.classList.add('remove-btn');
+        removeBtn.classList.add('Sbtn');
         removeBtn.textContent = 'Remove';
         removeBtn.addEventListener('click', function() {
           deleteSummary(index);

@@ -1,6 +1,10 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from summarizer import Summarizer
+from transformers import pipeline
+from textblob import TextBlob
+
+# Load the summarization pipeline
 
 app = Flask(__name__)
 CORS(app)
@@ -57,6 +61,52 @@ def delete_summary():
         return jsonify({'message': 'Summary deleted successfully'})
     else:
         return jsonify({'error': 'Invalid index'})
+
+@app.route('/abstract', methods=['POST'])
+def abstract():
+    data = request.get_json()
+    text = data['text']
+    word_count = len(text.split())
+    min_lengthh = int(request.args.get('min_length', 1))  
+    max_lengthh = int(request.args.get('max_length', 10))  
+    if min_lengthh > word_count:
+        min_lengthh = word_count
+        max_lengthh = word_count
+    if max_lengthh > word_count:
+        max_lengthh = word_count
+    abstractSum = pipeline("summarization")
+    summarys = abstractSum(text, min_length=min_lengthh, max_length=max_lengthh)
+    summary = summarys[0]['summary_text']
+    return jsonify({'summary': summary})
+
+@app.route('/analysis', methods=['POST'])
+def analysis():
+    data = request.get_json()
+    text = data['text']
+    # Create a TextBlob object
+    blob = TextBlob(text)
+    # Get the sentiment polarity (-1 to +1)
+    sentiment_polarity = blob.sentiment.polarity
+    # Get the emotion
+    if sentiment_polarity > 0:
+        emotion = "Positive"
+    elif sentiment_polarity < 0:
+        emotion = "Negative"
+    else:
+        emotion = "Neutral"
+    # Get the noun phrases (entities)
+    entities = [e.replace("`s", "") for e in blob.noun_phrases]
+    # Get the part-of-speech tags
+    pos_tags = blob.pos_tags
+
+    results = {
+        "sentiment_polarity": sentiment_polarity,
+        "emotion": emotion,
+        "entities": entities,
+        "pos_tags": pos_tags
+    }
+    # Return the results as JSON
+    return jsonify(results)
 
 if __name__ == '__main__':
     app.run(debug=True)
