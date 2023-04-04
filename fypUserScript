@@ -35,6 +35,7 @@
   var textarea = document.createElement("textarea");
   textarea.id = "input";
   textarea.addEventListener("input", count);
+  textarea.addEventListener("input", limitWords);
   panel.appendChild(textarea);
   panel.appendChild(document.createElement("br"));
 
@@ -66,7 +67,28 @@
   input.value = "1";
   input.classList.add('inp');
   panel.appendChild(input);
+  
+  var maxlabel = document.createElement("label");
+  maxlabel.for = "max-length";
+  maxlabel.innerText = "max words (cap 800)";
+  maxlabel.classList.add('label');
+  maxlabel.style.display = "none"; // hide 
 
+  var maxInput = document.createElement("input");
+  maxInput.type = "number";
+  maxInput.id = "max-length";
+  maxInput.min = "10";
+  maxInput.max = "800";
+  maxInput.value = "10";
+  maxInput.classList.add('inp');
+  maxInput.oninput = function() {
+    
+  if (this.value > 800) {
+    this.value = 800;
+ 	 }
+	}
+  maxInput.style.display = "none"; // hide 
+  
   var minlabel = document.createElement("label");
   minlabel.for = "min-length";
   minlabel.innerText = "min words";
@@ -78,25 +100,24 @@
   minInput.type = "number";
   minInput.id = "min-length";
   minInput.min = "1";
+  minInput.max = "800";
   minInput.value = "1";
   minInput.classList.add('inp');
   minInput.style.display = "none"; // hide 
+  minInput.oninput = function() {
+    if (this.value > maxInput.value) {
+      this.value = maxInput.value;
+    }
+    if (this.value < 1) {
+      this.value = 1;
+    }
+   if (this.value > 800) {
+      this.value = 800;
+    }
+    
+  };
   panel.appendChild(minInput);
-
-  var maxlabel = document.createElement("label");
-  maxlabel.for = "max-length";
-  maxlabel.innerText = "max words";
-  maxlabel.classList.add('label');
-  maxlabel.style.display = "none"; // hide 
   panel.appendChild(maxlabel);
-
-  var maxInput = document.createElement("input");
-  maxInput.type = "number";
-  maxInput.id = "max-length";
-  maxInput.min = "10";
-  maxInput.value = "10";
-  maxInput.classList.add('inp');
-  maxInput.style.display = "none"; // hide 
   panel.appendChild(maxInput);
 
   panel.appendChild(document.createElement("br"));
@@ -260,6 +281,7 @@
   iconClose.classList.add("material-icons");
   iconClose.classList.add("sp-icon-close");
   iconClose.innerText = "keyboard_double_arrow_right";
+  iconClose.style.display = "none";
   button.appendChild(iconClose);
     
   document.body.appendChild(button);
@@ -312,36 +334,11 @@
         background: #007960 !important;
       }
 
-      .sp-icon-close {
-        display: none ;
-      }
-
-      .side-panel-open .side-panel {
-        display: initial;
-      }
-
-      .side-panel-open .sp-icon-open {
-        display: none; /* hide open icon when side panel is open */
-      }
-      
-      .side-panel-open .sp-icon-close {
-        display: block; /* show close icon when side panel is open */
-      }
-      
-      .side-panel-open {
-        width: calc(100% - 300px);
-        margin-right: 400px;
-      }
-
-      .side-panel-open .side-panel-toggle {
-        left: calc(300px + 40px);
-        transition: left 0.3s ease-in-out; /* add this line */
-      }
-
       #container {
         margin-right: 0; /* Reset the right margin */
         transition: margin-right .5s;
       }
+
      .resizeLabel {
       position: absolute;
       bottom: 5px !important;
@@ -514,7 +511,9 @@
   button.style.right = "calc(400px)";
   button.removeEventListener('click', openNav); // remove the open event listener
   button.addEventListener('click', closeNav); // add the close event listener
-    
+	iconOpen.style.display = "none";
+  iconClose.style.display = "block";
+
   }
 
 function closeNav() {
@@ -526,6 +525,8 @@ function closeNav() {
   button.style.right = "0";
   button.removeEventListener('click', closeNav); // remove the close event listener
   button.addEventListener('click', openNav); // add the open event listener back
+	iconClose.style.display = "none";
+  iconOpen.style.display = "block";
 }
 
 
@@ -563,6 +564,15 @@ function closeNav() {
       }
   });
   
+  function limitWords() {
+  var limit = 798; // set the maximum number of words allowed
+  var input = document.getElementById("input").value;
+  var words = input.split(" ");
+    if (words.length > limit&&abstractCheckbox.checked ) {
+      words = words.slice(0, limit);
+      document.getElementById("input").value = words.join(" ");
+    }
+}
    function analysis() {
     const input = document.getElementById("summary").innerText;
     console.log(input);
@@ -612,6 +622,10 @@ function closeNav() {
         .then(response => response.json())
         .then(data => console.log(data))
         .catch(error => console.error(error));
+   if(isNoteOpen){
+    stickyNoteBtn.click();
+    stickyNoteBtn.click();
+   }
   }
 
   function pageSummary(){
@@ -648,7 +662,7 @@ function closeNav() {
       const blob = new Blob([JSON.stringify(input)], { type: "application/json" });
       req.send(blob);
       const response = JSON.parse(req.response);
-      var summary = response["summary"].replace("\\n", "\n").replace(/^"/, "");
+      var summary = response["summary"].replace("\\n", "\n").replace(/^"/, "").replace(/\\n/g, '');
       document.getElementById("summary").innerText = summary.trim();
       const word_count = summary.split(/\s+/).length;
       const sentence_count = summary.split(/[.?!]+/).filter(Boolean).length;
@@ -669,7 +683,7 @@ function closeNav() {
       const words = input.split(/\s+/).length;
       console.log(words);
       var abstractSummarize = document.getElementById("abstractCheckbox").checked;
-    	if(words>=800){
+      if(words>800){
 			 if (abstractCheckbox.checked) {
 			  abstractCheckbox.click();
        }
@@ -819,12 +833,6 @@ function closeNav() {
     }
     
 
-    document.addEventListener('keyup', function(event) {
-      if (event.key === 'Escape') {
-            stickyNote.removeChild(resizeLabel);
-      }
-    });
-
    function resizeContent() {
     content.style.width = (stickyNote.offsetWidth - 30) + 'px';
     content.style.height = (stickyNote.offsetHeight - 40) + 'px';
@@ -848,8 +856,8 @@ function get() {
           // Get the text within the summary element
           var text = summaryText.textContent;
           
-          // Remove the first character from the text
-          text = text.substring(1);
+          // Remove the first 4 characters from the text
+          text = text.substring(4);
 
           // Create a temporary textarea element to hold the text
           var tempTextarea = document.createElement("textarea");
@@ -945,6 +953,9 @@ function get() {
       if (e.keyCode === 27) {
         canMove = true;
         moveBtn.classList.add('active');
+        if (stickyNote.contains(resizeLabel)) {
+          stickyNote.removeChild(resizeLabel);
+        } 
         stickyNote.addEventListener('mousedown', startDragging);
         document.addEventListener('mouseup', stopDragging);
         document.addEventListener('mousemove', moveStickyNote);
