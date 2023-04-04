@@ -4,7 +4,6 @@
 // @match        http://*/*
 // @match        https://*/*
 // ==/UserScript==
-
 (function() {
   // Add link for Material Icons
   var highlight = false;
@@ -13,7 +12,7 @@
   link.href = "https://fonts.googleapis.com/icon?family=Material+Icons";
   link.rel = "stylesheet";
   document.head.appendChild(link);
-  
+
   // Wrap the original content in a container div
   var container = document.createElement('div');
   container.id = 'container';
@@ -22,28 +21,33 @@
   container.innerHTML = originalContent;
   container.style.marginRight = '20px';
   document.body.appendChild(container);
-  
 
+  // Add a wrapper div for the side panel
   var wrapper = document.createElement("div");
   wrapper.classList.add("wrapper");
-  document.body.appendChild(wrapper);   
+  document.body.appendChild(wrapper);
 
+  // Add a side panel div
   var panel = document.createElement("div");
   panel.id = "side-panel";
   wrapper.appendChild(panel);
 
+  // Add a textarea for user input
   var textarea = document.createElement("textarea");
   textarea.id = "input";
   textarea.addEventListener("input", count);
   textarea.addEventListener("input", limitWords);
+  textarea.classList.add('inp');
   panel.appendChild(textarea);
   panel.appendChild(document.createElement("br"));
 
+  // Add a span to display the word count
   var wordCount = document.createElement("span");
   wordCount.id = "word-count";
   panel.appendChild(wordCount);
   panel.appendChild(document.createElement("br"));
-  
+
+  // Add a button to summarize the input
   var summarizeButton = document.createElement("button");
   summarizeButton.id = "summarize-button";
   summarizeButton.innerText = "Summarize";
@@ -52,7 +56,7 @@
   panel.appendChild(document.createElement("br"));
   panel.appendChild(document.createElement("br"));
 
-
+  // Add a label and input for the number of sentences to summarize
   var label = document.createElement("label");
   label.for = "num-sentences";
   label.innerText = "Number Of Sentences";
@@ -67,12 +71,13 @@
   input.value = "1";
   input.classList.add('inp');
   panel.appendChild(input);
-  
+
+  // Add a label and input for the maximum word length (hidden by default)
   var maxlabel = document.createElement("label");
   maxlabel.for = "max-length";
   maxlabel.innerText = "max words (cap 800)";
   maxlabel.classList.add('label');
-  maxlabel.style.display = "none"; // hide 
+  maxlabel.style.display = "none"; // hide
 
   var maxInput = document.createElement("input");
   maxInput.type = "number";
@@ -82,20 +87,22 @@
   maxInput.value = "10";
   maxInput.classList.add('inp');
   maxInput.oninput = function() {
-    
-  if (this.value > 800) {
-    this.value = 800;
- 	 }
-	}
-  maxInput.style.display = "none"; // hide 
-  
+      // Cap the maximum value at 800
+      if (this.value > 800) {
+          this.value = 800;
+      }
+  }
+  maxInput.style.display = "none"; // hide
+
+  // create a label for the "min words" input box
   var minlabel = document.createElement("label");
   minlabel.for = "min-length";
   minlabel.innerText = "min words";
-  minlabel.style.display = "none"; // hide 
+  minlabel.style.display = "none";
   minlabel.classList.add('label');
   panel.appendChild(minlabel);
 
+  // create an input box for the minimum number of words
   var minInput = document.createElement("input");
   minInput.type = "number";
   minInput.id = "min-length";
@@ -103,18 +110,20 @@
   minInput.max = "800";
   minInput.value = "1";
   minInput.classList.add('inp');
-  minInput.style.display = "none"; // hide 
+  minInput.style.display = "none";
   minInput.oninput = function() {
-    if (this.value > maxInput.value) {
-      this.value = maxInput.value;
-    }
-    if (this.value < 1) {
-      this.value = 1;
-    }
-   if (this.value > 800) {
-      this.value = 800;
-    }
-    
+      // make sure the min value is not greater than the max value
+      if (this.value > maxInput.value) {
+          this.value = maxInput.value;
+      }
+      // make sure the min value is not less than 1
+      if (this.value < 1) {
+          this.value = 1;
+      }
+      // make sure the min value is not greater than 800
+      if (this.value > 800) {
+          this.value = 800;
+      }
   };
   panel.appendChild(minInput);
   panel.appendChild(maxlabel);
@@ -122,12 +131,14 @@
 
   panel.appendChild(document.createElement("br"));
   panel.appendChild(document.createElement("br"));
+  // create a checkbox for the advanced mode
   var advancedCheckbox = document.createElement("input");
   advancedCheckbox.type = "checkbox";
   advancedCheckbox.id = "advancedCheckbox";
   advancedCheckbox.value = "advanced";
   panel.appendChild(advancedCheckbox);
 
+  // create a label for the advanced mode checkbox
   var advancedLabel = document.createElement("label");
   advancedLabel.innerHTML = "Use Local Server";
   advancedLabel.for = "advancedCheckbox";
@@ -136,907 +147,1098 @@
   panel.appendChild(document.createElement("br"));
   panel.appendChild(document.createElement("br"));
 
+  // Create a checkbox for highlighting text
   var highlightCheckbox = document.createElement("input");
   highlightCheckbox.type = "checkbox";
   highlightCheckbox.id = "highlightCheckbox";
   highlightCheckbox.value = "highlight";
+  // Add an event listener to the highlightCheckbox
   highlightCheckbox.addEventListener("click", function() {
-    if (highlightCheckbox.checked) {
-      highlight = true;
-      textarea.style.display = "none"; // hide the input box
-      summarizeButton.style.display = "none"; // hide the summarize button
-    } else {
-      highlight = false;
-      textarea.style.display = "block"; // show the input box
-      summarizeButton.style.display = "initial"; // show the summarize button
-    }
+      // If the checkbox is checked, set highlight to true and hide the input box and the summarize button
+      if (highlightCheckbox.checked) {
+          highlight = true;
+          textarea.style.display = "none"; // hide the input box
+          summarizeButton.style.display = "none"; // hide the summarize button
+      }
+      // If the checkbox is not checked, set highlight to false and show the input box and the summarize button
+      else {
+          highlight = false;
+          textarea.style.display = "block"; // show the input box
+          summarizeButton.style.display = "initial"; // show the summarize button
+      }
   });
+  // Add the highlightCheckbox to the panel
   panel.appendChild(highlightCheckbox);
 
+  // Create a label for the highlightCheckbox
   var highlightLabel = document.createElement("label");
   highlightLabel.innerHTML = "Highlight Text Mode";
   highlightLabel.for = "highlightCheckbox";
   highlightLabel.classList.add('label');
+  // Add the highlightLabel to the panel
   panel.appendChild(highlightLabel);
   panel.appendChild(document.createElement("br"));
   panel.appendChild(document.createElement("br"));
 
-  
+  // Create a checkbox for abstract summarization
   var abstractCheckbox = document.createElement("input");
   abstractCheckbox.type = "checkbox";
   abstractCheckbox.id = "abstractCheckbox";
   abstractCheckbox.value = "abstract";
+  // Add an event listener to the abstractCheckbox
   abstractCheckbox.addEventListener("click", function() {
-    if (abstractCheckbox.checked) {
-			advancedCheckbox.checked = true; // check the advancedCheckbox
-      input.style.display = "none"; // hide the input box
-      label.style.display = "none"; // hide 
-      minlabel.style.display = "block"; // hide 
-      maxlabel.style.display = "block"; // hide 
-      minInput.style.display = "block"; // hide the summarize button
-      maxInput.style.display = "block"; // hide the summarize button
-    } else {
-      input.style.display = "block"; // hide the input box
-      label.style.display = "block"; // hide the input box
-      minlabel.style.display = "none"; // hide 
-      maxlabel.style.display = "none"; // hide 
-      minInput.style.display = "none"; // hide the summarize button
-      maxInput.style.display = "none"; // hide the summarize button
-    }
+      // If the checkbox is checked, set advancedCheckbox to checked, hide the input box and some labels, and show the min and max inputs
+      if (abstractCheckbox.checked) {
+          advancedCheckbox.checked = true; // check the advancedCheckbox
+          input.style.display = "none"; // hide the input box
+          label.style.display = "none"; // hide
+          minlabel.style.display = "block"; // hide
+          maxlabel.style.display = "block"; // hide
+          minInput.style.display = "block"; // hide the summarize button
+          maxInput.style.display = "block"; // hide the summarize button
+      }
+      // If the checkbox is not checked, show the input box and some labels, and hide the min and max inputs
+      else {
+          input.style.display = "block"; // show the input box
+          label.style.display = "block"; // show the input box
+          minlabel.style.display = "none"; // hide
+          maxlabel.style.display = "none"; // hide
+          minInput.style.display = "none"; // hide the summarize button
+          maxInput.style.display = "none"; // hide the summarize button
+      }
   });
+  // Add the abstractCheckbox to the panel
   panel.appendChild(abstractCheckbox);
 
+  // Create a label for the abstractCheckbox
   var abstractLabel = document.createElement("label");
   abstractLabel.innerHTML = "Abstract Summirization";
   abstractLabel.for = "highlightCheckbox";
   abstractLabel.classList.add('label');
+  // Add the abstractLabel to the panel
   panel.appendChild(abstractLabel);
   panel.appendChild(document.createElement("br"));
   panel.appendChild(document.createElement("br"));
-  
+
+  // Create a checkbox for floating sidebar
   var floatingCheckbox = document.createElement("input");
   floatingCheckbox.type = "checkbox";
   floatingCheckbox.id = "floatingCheckbox";
   floatingCheckbox.value = "floating sidebar";
+  // Add an event listener to the floatingCheckbox
   floatingCheckbox.addEventListener("click", function() {
-    if (floatingCheckbox.checked) {
-      floating = true;
-    } else {
-      floating = false;
-      container.style.marginRight = '0';
-    }
+      // If the checkbox is checked, set floating to true
+      if (floatingCheckbox.checked) {
+          floating = true;
+      } else {
+          // If the checkbox is not checked, set floating to false
+          floating = false;
+          container.style.marginRight = '0';
+      }
   });
   panel.appendChild(floatingCheckbox);
-  
+
+  // Create a label for the floating sidebar
   var floatingLabel = document.createElement("label");
   floatingLabel.innerHTML = "Floating Sidebar";
   floatingLabel.for = "floatingCheckbox";
   floatingLabel.classList.add('label');
+  // Append the label to the panel
   panel.appendChild(floatingLabel);
-  panel.appendChild(document.createElement("br"));    
+
+  // Add line breaks to the panel
   panel.appendChild(document.createElement("br"));
-  
+  panel.appendChild(document.createElement("br"));
+
+  // Create a button to create a sticky note
   var stickyNoteBtn = document.createElement('button');
   stickyNoteBtn.classList.add('stickyNoteBtn');
   stickyNoteBtn.textContent = 'Create Sticky Note';
+  // Append the button to the panel
   panel.appendChild(stickyNoteBtn);
-  panel.appendChild(document.createElement("br"));    
+  // Add line breaks to the panel
+  panel.appendChild(document.createElement("br"));
   panel.appendChild(document.createElement("br"));
 
+  // Create a button to summarize the entire page
   var entirePage = document.createElement('button');
   entirePage.classList.add('btn');
   entirePage.textContent = 'Summarise Entire Page';
   entirePage.addEventListener("click", pageSummary);
+  // Append the button to the panel
   panel.appendChild(entirePage);
-  panel.appendChild(document.createElement("br"));    
+  // Add line breaks to the panel
+  panel.appendChild(document.createElement("br"));
   panel.appendChild(document.createElement("br"));
 
-  
+  // Create a button to analyze the summary
   var analysisButton = document.createElement('button');
   analysisButton.classList.add('btn');
   analysisButton.textContent = 'Analyize Summary';
   analysisButton.addEventListener("click", analysis);
+  // Append the button to the panel
   panel.appendChild(analysisButton);
-  panel.appendChild(document.createElement("br"));    
+  // Add line breaks to the panel
   panel.appendChild(document.createElement("br"));
-  
+  panel.appendChild(document.createElement("br"));
+
+  // Create a button to copy the summary
   var copyButton = document.createElement("button");
   copyButton.id = "copy-button";
   copyButton.innerHTML = "&#x1F4CB; Copy";
   copyButton.classList.add('btn');
+  // Append the button to the panel
   panel.appendChild(copyButton);
- 
+
+  // Create a button to pin the summary to a sticky note
   var notesButton = document.createElement("button");
   notesButton.id = "notes-button";
   notesButton.innerHTML = "&#x1f4cd; Pin Summary to sticky note";
   notesButton.classList.add('btn');
   notesButton.addEventListener("click", notes);
+  // Append the button to the panel
   panel.appendChild(notesButton);
 
-  
+  // Create a new <p> element and assign it an ID of "summary-analysis"
   var summaryAnalysis = document.createElement("p");
   summaryAnalysis.id = "summary-analysis";
+  // Append the new element to an existing element with ID of "panel"
   panel.appendChild(summaryAnalysis);
-  
+
+  // Create a new <p> element and assign it an ID of "summary"
   var summary = document.createElement("p");
   summary.id = "summary";
   summary.innerText = "summarized";
+  // Append the new element to an existing element with ID of "panel"
   panel.appendChild(summary);
 
+  // Create a new <p> element and assign it an ID of "summary-count"
   var summaryCount = document.createElement("p");
   summaryCount.id = "summary-count";
+  // Append the new element to an existing element with ID of "panel"
   panel.appendChild(summaryCount);
 
+  // Create a new <button> element
   var button = document.createElement("button");
   button.classList.add("side-panel-toggle");
   button.type = "button";
 
+  // Create a new <span> element to hold an icon for the open button
   var iconOpen = document.createElement("span");
   iconOpen.classList.add("material-icons");
   iconOpen.classList.add("sp-icon-open");
   iconOpen.innerText = "keyboard_double_arrow_left";
+  // Append the new icon to the button
   button.appendChild(iconOpen);
 
+  // Create a new <span> element to hold an icon for the close button
   var iconClose = document.createElement("span");
   iconClose.classList.add("material-icons");
   iconClose.classList.add("sp-icon-close");
   iconClose.innerText = "keyboard_double_arrow_right";
   iconClose.style.display = "none";
+  // Append the new icon to the button
   button.appendChild(iconClose);
-    
+
+  // Append the new button to the body of the web page
   document.body.appendChild(button);
-        var css = document.createElement("style");
-    css.innerText = `
 
+  // Create a new <style> element
+  var css = document.createElement("style");
+
+  css.innerText = `
+
+    /* The following CSS styles apply to a fixed side panel that slides in from the right */
     #side-panel {
-      position: fixed;
+      position: fixed; /* Fixed position */
       font-size: 16px !important;
       font-family: Arial !important;
-      top: 0;
-      right: -440px;
-      width: 380px;
-      height: 100%;
-      z-index: 9999;
-      transition: right 0.3s ease-in-out;
-      flex-shrink: 0;
-      padding: 30px ;
-      padding-bottom: 10%;
-      color: #ffffff !important;
-      background:  #674292;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.35);
-      overflow-y: scroll;
-      resize: horizontal; /* added property for resizing */
+      top: 0; /* Align to the top */
+      right: -440px; /* Position offscreen */
+      width: 380px; /* Width of the panel */
+      height: 100%; /* Height of the panel */
+      z-index: 9999; /* Ensure the panel is on top of other elements */
+      transition: right 0.3s ease-in-out; /* Transition effect */
+      flex-shrink: 0; /* Prevent panel from shrinking */
+      padding: 30px ; /* Add padding */
+      padding-bottom: 10%; /* Add bottom padding */
+      color: #ffffff !important; /* Text color */
+      background: #674292; /* Background color */
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.35); /* Add box shadow */
+      overflow-y: scroll; /* Enable scrolling */
+      resize: horizontal; /* Enable horizontal resizing */
+    }
 
-  }
+    /* The following CSS styles apply to a button that toggles the side panel */
+    .side-panel-toggle {
+      position: fixed; /* Fixed position */
+      top: 50%; /* Align to the vertical center */
+      right: 0px; /* Align to the right */
+      z-index: 9999; /* Ensure the button is on top of other elements */
+      display: flex; /* Display as a flex container */
+      color: #ffffff !important; /* Text color */
+      background: #674292 !important; /* Background color */
+      border: none; /* Remove border */
+      border-radius: 5px; /* Add rounded corners */
+      outline: none; /* Remove outline */
+      cursor: pointer; /* Change cursor on hover */
+      width: 35px !important; /* Width of the button */
+      height: 35px !important; /* Height of the button */
+      padding: 0; /* Remove padding */
+      transform: translateY(-50%); /* Position vertically */
+      left: auto; /* Reset the left position */
+      transition: left 0.3s ease-in-out; /* Add transition effect */
+    }
 
+    /* The following CSS styles apply to the button when hovered */
+    .side-panel-toggle:hover {
+      background: #007960 !important;
+    }
 
-      .side-panel-toggle {
-        position: fixed; 
-        top: 50%;
-        right: 0px;
-        z-index: 9999;
-        display: flex;
-        color: #ffffff !important;
-        background:  #674292 !important;
-        border: none;
-        border-radius: 5px;
-        outline: none;
-        cursor: pointer;
-        width: 35px !important;
-        height: 35px !important;
-        padding: 0;
-        transform: translateY(-50%);
-        left: auto; /* reset the left property */
-        transition: left 0.3s ease-in-out;
-      }
+    /* The following CSS styles apply to the container element */
+    #container {
+      margin-right: 0; /* Reset the right margin */
+      transition: margin-right .5s; /* Add transition effect */
+    }
 
-      .side-panel-toggle:hover {
-        background: #007960 !important;
-      }
-
-      #container {
-        margin-right: 0; /* Reset the right margin */
-        transition: margin-right .5s;
-      }
-
-     .resizeLabel {
-      position: absolute;
-      bottom: 5px !important;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 12px;
-      font-weight: bold;
-      color: black !important;
-      border-radius: 10px !important;
-      padding: 10px; /* add padding */
-  	  background-color: white !important;;
+    /* The following CSS styles apply to the label for the resizing handle */
+    .resizeLabel {
+      position: absolute; /* Absolute position */
+      bottom: 5px !important; /* Position at the bottom */
+      left: 50%; /* Position at the horizontal center */
+      transform: translateX(-50%); /* Center horizontally */
+      font-size: 12px; /* Font size */
+      font-weight: bold; /* Font weight */
+      color: black !important; /* Text color */
+      border-radius: 10px !important; /* Add rounded corners */
+      padding: 10px; /* Add padding */
+      background-color: white !important;; /* Background color */
     }
 
 
+    /* This section styles the sticky note container */
     .stickyNote {
-        position: fixed;
-        font-size: 16px !important;
-        font-family: Arial !important;
-        top: 50px;
-        left: 50px;
-        border: 2px solid #000;
-        width: 200px;
-        height: 200px;
-        padding: 10px;
-        border-radius: 10px;
-        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
-        z-index: 999 !important;
-        background-color: #fde74c;
-        overflow-y: auto;
-        color: black !important;
-        z-index: 9999 !important;
-
+        position: fixed; /* Keeps the note fixed in position */
+        font-size: 16px !important; /* Overrides the font size */
+        font-family: Arial !important; /* Overrides the font family */
+        top: 50px; /* Positions the note 50px from the top */
+        left: 50px; /* Positions the note 50px from the left */
+        border: 2px solid #000; /* Adds a border with 2px thickness and black color */
+        width: 200px; /* Sets the width of the note */
+        height: 200px; /* Sets the height of the note */
+        padding: 10px; /* Adds padding inside the note */
+        border-radius: 10px; /* Adds rounded corners to the note */
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5); /* Adds a box shadow with a 50% opacity black color */
+        z-index: 999 !important; /* Sets the stacking order of the note */
+        background-color: #fde74c; /* Sets the background color of the note */
+        overflow-y: auto; /* Enables vertical scrolling if the content exceeds the note height */
+        color: black !important; /* Overrides the font color */
+        z-index: 9999 !important; /* Overrides the stacking order */
     }
 
+    /* This section styles the buttons within the note */
     .btn { 
-        font-size: 14px;
-        font-weight: bold;
-        cursor: pointer;
-        background-color: #3498db;
-        color: #fff;
-        border: none;
-        padding: 5px 10px;
-        border-radius: 4px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        transition: background-color 0.3s ease; 
+        font-size: 14px; /* Sets the font size */
+        font-weight: bold; /* Sets the font weight to bold */
+        cursor: pointer; /* Sets the cursor to a pointer */
+        background-color: #3498db; /* Sets the background color */
+        color: #fff; /* Sets the font color to white */
+        border: none; /* Removes the border */
+        padding: 5px 10px; /* Adds padding to the button */
+        border-radius: 4px; /* Adds rounded corners to the button */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Adds a box shadow with a 10% opacity black color */
+        transition: background-color 0.3s ease; /* Adds a transition effect */
     } 
+
+    /* This section styles the hover state of the buttons within the note */
     .btn:hover {
-            background: #007960 !important;
-     }
-
-      .stickyNoteBtn {
-        font-size: 14px;
-        font-weight: bold;
-        cursor: pointer;
-        background-color: #3498db;
-        color: #fff;
-        border: none;
-        padding: 5px 10px;
-        border-radius: 4px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        transition: background-color 0.3s ease;
-      }
-			
-			.stickyNoteBtn:hover {
-        background: #007960 !important;
-      }
-
-
-			.content {
-			position: absolute;
-      width: 100%;
-      height: 100%;
-      padding: 10px;
-      box-sizing: border-box;
-      font-size: 16px !important;
-      font-family: Arial !important;
-      font-weight: bold !important;
-      color: black !important;
-      border: none;
+        background: #007960 !important; /* Sets the background color on hover */
     }
 
+    /* This section styles the move button within the note */
+    .stickyNoteBtn {
+        font-size: 14px; /* Sets the font size */
+        font-weight: bold; /* Sets the font weight to bold */
+        cursor: pointer; /* Sets the cursor to a pointer */
+        background-color: #3498db; /* Sets the background color */
+        color: #fff; /* Sets the font color to white */
+        border: none; /* Removes the border */
+        padding: 5px 10px; /* Adds padding to the button */
+        border-radius: 4px; /* Adds rounded corners to the button */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Adds a box shadow with a 10% opacity black color */
+        transition: background-color 0.3s ease; /* Adds a transition effect */
+    }
+
+    /* This section styles the hover state of the move button within the note */
+    .stickyNoteBtn:hover {
+        background: #007960 !important; /* Sets the background color on hover */
+    }
+
+    /* Styling for the main content container */
+    .content {
+      position: absolute; /* Set the position to absolute */
+      width: 100%; /* Set the width to 100% */
+      height: 100%; /* Set the height to 100% */
+      padding: 10px; /* Add 10px of padding */
+      box-sizing: border-box; /* Include padding and border in the total element width */
+      font-size: 16px !important; /* Set the font size to 16px */
+      font-family: Arial !important; /* Set the font family to Arial */
+      font-weight: bold !important; /* Set the font weight to bold */
+      color: black !important; /* Set the font color to black */
+      border: none; /* Remove the border */
+    }
+
+    /* Styling for the close button on the sticky note */
     .stickyNote .close {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    font-size: 24px;
-    font-weight: bold;
-    color: #000;
-    cursor: pointer;
+      position: absolute; /* Set the position to absolute */
+      top: 5px; /* Set the distance from the top to 5px */
+      right: 5px; /* Set the distance from the right to 5px */
+      font-size: 24px; /* Set the font size to 24px */
+      font-weight: bold; /* Set the font weight to bold */
+      color: #000; /* Set the font color to black */
+      cursor: pointer; /* Change the cursor to a pointer */
     }
 
+    /* Styling for the move button on the sticky note */
     .stickyNote .move {
-    position: absolute;
-    bottom: 5px;
-    right: 5px;
-    font-size: 15px;
-    padding: 5px;
-    font-weight: bold !important;
-    color: black !important;
-    background-color: #e5e9ec !important;
-    border: none;
-    border-radius: 2px;
-    cursor: pointer;
-
+      position: absolute; /* Set the position to absolute */
+      bottom: 5px; /* Set the distance from the bottom to 5px */
+      right: 5px; /* Set the distance from the right to 5px */
+      font-size: 15px; /* Set the font size to 15px */
+      padding: 5px; /* Add 5px of padding */
+      font-weight: bold !important; /* Set the font weight to bold */
+      color: black !important; /* Set the font color to black */
+      background-color: #e5e9ec !important; /* Set the background color to #e5e9ec */
+      border: none; /* Remove the border */
+      border-radius: 2px; /* Add a border radius of 2px */
+      cursor: pointer; /* Change the cursor to a pointer */
     }
 
+    /* Styling for the active move button on the sticky note */
     .stickyNote .move.active {
-    background-color: #bbb;
+      background-color: #bbb; /* Set the background color to #bbb */
     }
 
-     .summary-wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-bottom: 10px;
+    /* Styling for the summary wrapper */
+    .summary-wrapper {
+      display: flex; /* Set the display to flex */
+      flex-direction: column; /* Set the flex direction to column */
+      align-items: center; /* Center the items horizontally */
+      margin-bottom: 10px; /* Add a margin of 10px at the bottom */
     }
 
-
+    /* Styling for the summary text */
     .summary-text {
-     flex-direction: column;
-      flex: 1;
-      margin-right: 10px;
+      flex-direction: column; /* Set the flex direction to column */
+      flex: 1; /* Set the flex value to 1 */
+      margin-right: 10px; /* Add a margin of 10px at the right */
     }
 
-  .label {
-    font-weight: bold;
-    padding: 20px;
-    font-size: 16px;
-  }
-  .inp {
-      margin: auto!important;
-  }
+    /* Styling for the label */
+    .label {
+      font-weight: bold; /* Set the font weight to bold */
+      padding: 20px; /* Add 20px of padding */
+      font-size: 16px; /* Set the font size to 16px */
+    }
 
- .Sbtn { 
-        font-size: 14px;
-        font-weight: bold;
-        cursor: pointer;
-        background-color: #5b7c99;
-        color: #fff;
-        border: none;
-        padding: 5px 10px;
-        border-radius: 4px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        transition: background-color 0.3s ease; 
-    } 
+    /* Styling for the input field */
+    .inp {
+      margin: auto!important; /* Center the input field horizontally */
+    }
+
+    /* Styling for the submit button */
+    .Sbtn {
+        font-size: 14px; /* sets the font size to 14 pixels */
+        font-weight: bold; /* makes the font bold */
+        cursor: pointer; /* changes the cursor to a pointer when hovering over the button */
+        background-color: #5b7c99; /* sets the background color to a shade of blue */
+        color: #fff; /* sets the text color to white */
+        border: none; /* removes the border around the button */
+        padding: 5px 10px; /* sets the padding to 5 pixels on top/bottom and 10 pixels on left/right */
+        border-radius: 4px; /* adds rounded corners to the button */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* adds a box shadow to the button */
+        transition: background-color 0.3s ease; /* sets the transition time for the background color change */
+    }
+
+    /* Hover effect for the Sbtn class */
     .Sbtn:hover {
-            background: #007960 !important;
-     }
- 
-      .wrapper{
-      text-align: center!important;
-     display: block !important;
-      justify-content: center !important;
-      align-items: center !important;
-			margin-left: auto;
-      margin-right: auto;
-     }
+        background: #007960 !important; /* changes the background color to a darker shade of green on hover */
+    }
+
+    /* Style for the wrapper class */
+    .wrapper{
+        text-align: center!important; /* centers the text within the wrapper */
+        display: block !important; /* sets the display property to block and overrides any other display property */
+        justify-content: center !important; /* centers the content horizontally within the wrapper */
+        align-items: center !important; /* centers the content vertically within the wrapper */
+        margin-left: auto; /* sets the left margin to automatic to center the wrapper horizontally */
+        margin-right: auto; /* sets the right margin to automatic to center the wrapper horizontally */
+    }
 
 `;
-    document.head.appendChild(css);
-    
+  // This line appends a CSS stylesheet to the head of the document
+  document.head.appendChild(css);
 
-  function openNav() {  
-    if(!floating){
-    container.style.marginRight = '410px';
+  // This function opens the side panel when the button is clicked
+  function openNav() {
+      // Check if the 'floating' variable is false
+      if (!floating) {
+          // If so, set the container's margin to make space for the side panel
+          container.style.marginRight = '410px';
+      }
+      // Set the panel's right position to 0
+      panel.style.right = "0";
+      // Add a class to the wrapper to indicate that the side panel is open
+      wrapper.classList.add("side-panel-open");
+      // Set the button's transition and right position
+      button.style.transition = "right 0.3s ease-in-out";
+      button.style.right = "calc(400px)";
+      // Remove the open event listener from the button
+      button.removeEventListener('click', openNav);
+      // Add a close event listener to the button
+      button.addEventListener('click', closeNav);
+      // Hide the open icon and show the close icon
+      iconOpen.style.display = "none";
+      iconClose.style.display = "block";
   }
-  panel.style.right = "0";
-  wrapper.classList.add("side-panel-open");
-  button.style.transition = "right 0.3s ease-in-out";
-  button.style.right = "calc(400px)";
-  button.removeEventListener('click', openNav); // remove the open event listener
-  button.addEventListener('click', closeNav); // add the close event listener
-	iconOpen.style.display = "none";
-  iconClose.style.display = "block";
 
+  // This function closes the side panel when the button is clicked
+  function closeNav() {
+      // Reset the container's margin
+      container.style.marginRight = '0';
+      container.style.marginRight = '20px';
+      // Set the panel's right position to -440px to hide it
+      panel.style.right = "-440px";
+      // Remove the class indicating that the side panel is open
+      wrapper.classList.remove("side-panel-open");
+      // Set the button's transition and right position
+      button.style.transition = "right 0.3s ease-in-out";
+      button.style.right = "0";
+      // Remove the close event listener from the button
+      button.removeEventListener('click', closeNav);
+      // Add the open event listener back to the button
+      button.addEventListener('click', openNav);
+      // Hide the close icon and show the open icon
+      iconClose.style.display = "none";
+      iconOpen.style.display = "block";
   }
 
-function closeNav() {
-  container.style.marginRight = '0';
-  container.style.marginRight = '20px';
-  panel.style.right = "-440px";
-  wrapper.classList.remove("side-panel-open");
-  button.style.transition = "right 0.3s ease-in-out";
-  button.style.right = "0";
-  button.removeEventListener('click', closeNav); // remove the close event listener
-  button.addEventListener('click', openNav); // add the open event listener back
-	iconClose.style.display = "none";
-  iconOpen.style.display = "block";
-}
-
-
-  // Add event listeners
+  // Add an open event listener to the button
   button.addEventListener('click', openNav);
 
+  // Add a click event listener to the copy button
   copyButton.addEventListener("click", function() {
-    // Get the text within the summary element
-    var summaryText = document.getElementById("summary").innerText;
+      // Get the text within the summary element
+      var summaryText = document.getElementById("summary").innerText;
 
-    // Create a temporary textarea element to hold the text
-    var tempTextarea = document.createElement("textarea");
-    tempTextarea.value = summaryText;
-    document.body.appendChild(tempTextarea);
+      // Create a temporary textarea element to hold the text
+      var tempTextarea = document.createElement("textarea");
+      tempTextarea.value = summaryText;
+      document.body.appendChild(tempTextarea);
 
-    // Copy the text from the temporary textarea to the clipboard
-    tempTextarea.select();
-    document.execCommand("copy");
+      // Copy the text from the temporary textarea to the clipboard
+      tempTextarea.select();
+      document.execCommand("copy");
 
-    // Remove the temporary textarea
-    document.body.removeChild(tempTextarea);
+      // Remove the temporary textarea
+      document.body.removeChild(tempTextarea);
   });
 
+  // Add a click event listener to the summarize button
   summarizeButton.addEventListener("click", function() {
-      // get the checkbox value
+      // Get the value of the advancedCheckbox
       var advancedSummarize = document.getElementById("advancedCheckbox").checked;
 
-      // summarize the page content using the appropriate function
+      // Summarize the page content using the appropriate function based on the checkbox value
       if (advancedSummarize) {
-        console.log('local');
+          console.log('local');
           localSummarize();
       } else {
-        console.log('cloud');
+          console.log('cloud');
           summarize();
       }
   });
-  
+
   function limitWords() {
-  var limit = 798; // set the maximum number of words allowed
-  var input = document.getElementById("input").value;
-  var words = input.split(" ");
-    if (words.length > limit&&abstractCheckbox.checked ) {
-      words = words.slice(0, limit);
-      document.getElementById("input").value = words.join(" ");
-    }
-}
-   function analysis() {
-    const input = document.getElementById("summary").innerText;
-    console.log(input);
-    const data = JSON.stringify({ text: input });
-    const url = `http://localhost:5000/analysis?`;
-    const xhr = new XMLHttpRequest();
-    xhr.open("POST", url);
-    xhr.setRequestHeader("Content-Type", "application/json");
-    xhr.onload = function () {
-      if (xhr.status === 200) {
-        const response = JSON.parse(xhr.responseText);
-        console.log(response);
-        const sentiment_polarity = response.sentiment_polarity;
-        const emotion = response.emotion;
-        const entities = Array.isArray(response.entities) ? response.entities.join(", ") : response.entities;
-        let pos_tags = "";
-            for (let i = 0; i < response.pos_tags.length; i++) {
-                pos_tags += `[${response.pos_tags[i][0]}:${response.pos_tags[i][1]}] `;
-            }
-            const analysis = `Sentiment polarity: ${sentiment_polarity}<br>Emotion: ${emotion}<br>Entities: ${entities}<br>POS tags: ${pos_tags}<br>`;
-         document.getElementById("summary-analysis").innerHTML = analysis;
-      } else {
-        console.error("Error:", xhr.statusText);
+      var limit = 798; // set the maximum number of words allowed
+      var input = document.getElementById("input").value;
+      var words = input.split(" "); // split the input into an array of words
+      if (words.length > limit && abstractCheckbox.checked) { // check if the number of words exceeds the limit and the abstract checkbox is checked
+          words = words.slice(0, limit); // truncate the words array to the specified limit
+          document.getElementById("input").value = words.join(" "); // join the truncated words array and set it as the value of the input field
       }
-    };
-    xhr.onerror = function () {
-      console.error("Error:", xhr.statusText);
-    };
-    xhr.send(data);
-}
-
-     function notes(){
-                 console.log('hi');
-
-      const url = `http://localhost:5000/summariess`;
-      const data = JSON.stringify({ text: summary.innerText});
-      const requestOptions = {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: data
-    };
-
-    // Send the request
-    fetch(url, requestOptions)
-        .then(response => response.json())
-        .then(data => console.log(data))
-        .catch(error => console.error(error));
-   if(isNoteOpen){
-    stickyNoteBtn.click();
-    stickyNoteBtn.click();
-   }
   }
 
-  function pageSummary(){
-    var paragraphs = document.getElementsByTagName("p");
-    var text = "";
-    for (var i = 0; i < paragraphs.length; i++) {
-      text += paragraphs[i].innerText + " ";
-    }
-    document.getElementById("input").value = text;
-    var advancedSummarize = document.getElementById("advancedCheckbox").checked;
+  function analysis() {
+      const input = document.getElementById("summary").innerText; // get the text content of the summary element
+      console.log(input); // log the input to the console
+      const data = JSON.stringify({
+          text: input
+      }); // convert the input to a JSON string
+      const url = `http://localhost:5000/analysis?`; // set the URL for the analysis API endpoint
+      const xhr = new XMLHttpRequest(); // create a new XMLHttpRequest object
+      xhr.open("POST", url); // open a POST request to the API endpoint
+      xhr.setRequestHeader("Content-Type", "application/json"); // set the request header to indicate the JSON data format
+      xhr.onload = function() { // handle the response when the request is completed
+          if (xhr.status === 200) { // check if the status code is 200 OK
+              const response = JSON.parse(xhr.responseText); // parse the response text as JSON data
+              console.log(response); // log the response to the console
+              const sentiment_polarity = response.sentiment_polarity; // extract the sentiment polarity value from the response
+              const emotion = response.emotion; // extract the emotion value from the response
+              const entities = Array.isArray(response.entities) ? response.entities.join(", ") : response.entities; // convert the entities array to a comma-separated string
+              let pos_tags = ""; // initialize an empty string for the POS tags
+              for (let i = 0; i < response.pos_tags.length; i++) { // loop through the POS tags array
+                  pos_tags += `[${response.pos_tags[i][0]}:${response.pos_tags[i][1]}] `; // append each POS tag to the pos_tags string in a specific format
+              }
+              const analysis = `Sentiment polarity: ${sentiment_polarity}<br>Emotion: ${emotion}<br>Entities: ${entities}<br>POS tags: ${pos_tags}<br>`; // create an analysis string with the extracted values
+              document.getElementById("summary-analysis").innerHTML = analysis; // set the inner HTML of the summary-analysis element to the analysis string
+          } else {
+              console.error("Error:", xhr.statusText); // log an error message to the console if the status code is not 200 OK
+          }
+      };
+      xhr.onerror = function() { // handle errors that occur during the request
+          console.error("Error:", xhr.statusText); // log an error message to the console
+      };
+      xhr.send(data); // send the JSON data in the request body
+  }
 
-      // summarize the page content using the appropriate function
+  function notes() {
+      console.log('hi');
+
+      // Set the URL for sending the summary data
+      const url = `http://localhost:5000/summariess`;
+      // Create a JSON string of the summary text data
+      const data = JSON.stringify({
+          text: summary.innerText
+      });
+      // Set the request options for sending the data
+      const requestOptions = {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json'
+          },
+          body: data
+      };
+
+      // Send the summary data request to the server
+      fetch(url, requestOptions)
+          .then(response => response.json())
+          .then(data => console.log(data))
+          .catch(error => console.error(error));
+
+      // Check if the note is open and close it twice to toggle it
+      if (isNoteOpen) {
+          stickyNoteBtn.click();
+          stickyNoteBtn.click();
+      }
+  }
+
+  function pageSummary() {
+      // Get all the paragraphs on the page
+      var paragraphs = document.getElementsByTagName("p");
+      var text = "";
+      for (var i = 0; i < paragraphs.length; i++) {
+          text += paragraphs[i].innerText + " ";
+      }
+      // Set the value of the input field to the text of all paragraphs
+      document.getElementById("input").value = text;
+      // Check if the advanced checkbox is checked
+      var advancedSummarize = document.getElementById("advancedCheckbox").checked;
+
+      // Summarize the page content using the appropriate function
       if (advancedSummarize) {
-        console.log('local');
+          console.log('local');
+          // Call the local summarization function
           localSummarize();
       } else {
-        console.log('cloud');
+          console.log('cloud');
+          // Call the cloud summarization function
           summarize();
       }
   }
-    
-    function summarize() {
+
+
+  // Function to summarize text
+  function summarize() {
+      // Clear summary analysis area
       document.getElementById("summary-analysis").innerHTML = '';
+      // Get input text
       const input = document.getElementById("input").value;
+      // Get number of lines in input text
       const numLines = input.split("\n").length;
-      if(numLines<=119){
-      const num_sentences = document.getElementById("num-sentences").value;
-      const req = new XMLHttpRequest();
-      req.open(
-          "POST",
-          `https://api.smrzr.io/v1/summarize?num_sentences=${num_sentences}&algorithm=kmeans`,
-          false
-      );
-      const blob = new Blob([JSON.stringify(input)], { type: "application/json" });
-      req.send(blob);
-      const response = JSON.parse(req.response);
-      var summary = response["summary"].replace("\\n", "\n").replace(/^"/, "").replace(/\\n/g, '');
-      document.getElementById("summary").innerText = summary.trim();
-      const word_count = summary.split(/\s+/).length;
-      const sentence_count = summary.split(/[.?!]+/).filter(Boolean).length;
-      const input_word_count = input.split(" ").length;
-      const percent_reduction = Math.round((1 - word_count / input_word_count) * 100);
-      document.getElementById("summary-count").innerHTML = `(${word_count} words, ${sentence_count} sentences, Text reduced by ${percent_reduction}% (${input_word_count} to ${word_count}))<br><br><br>`;
-    }else{
-      localSummarize();
-    }
-  
+      // Check if input has less than or equal to 119 lines
+      if (numLines <= 119) {
+          // Get number of sentences from user input
+          const num_sentences = document.getElementById("num-sentences").value;
+          // Make a POST request to API to get summary
+          const req = new XMLHttpRequest();
+          // Set request parameters
+          req.open(
+              "POST",
+              `https://api.smrzr.io/v1/summarize?num_sentences=${num_sentences}&algorithm=kmeans`,
+              false
+          );
+          // Convert input text to JSON format and create a blob
+          const blob = new Blob([JSON.stringify(input)], {
+              type: "application/json"
+          });
+          // Send request with input text
+          req.send(blob);
+          // Get response from API
+          const response = JSON.parse(req.response);
+          // Get summary text from API response
+          var summary = response["summary"].replace("\\n", "\n").replace(/^"/, "").replace(/\\n/g, '');
+          // Set summary text in HTML
+          document.getElementById("summary").innerText = summary.trim();
+          // Get word count of summary text
+          const word_count = summary.split(/\s+/).length;
+          // Get sentence count of summary text
+          const sentence_count = summary.split(/[.?!]+/).filter(Boolean).length;
+          // Get word count of input text
+          const input_word_count = input.split(" ").length;
+          // Calculate percentage reduction in text length
+          const percent_reduction = Math.round((1 - word_count / input_word_count) * 100);
+          // Set summary statistics in HTML
+          document.getElementById("summary-count").innerHTML = `(${word_count} words, ${sentence_count} sentences, Text reduced by ${percent_reduction}% (${input_word_count} to ${word_count}))<br><br><br>`;
+      } else {
+          // If input has more than 119 lines, use local summarization function
+          localSummarize();
+      }
   }
 
   function localSummarize() {
-      advancedCheckbox.checked = true; // check the advancedCheckbox
+      // Check the advancedCheckbox
+      advancedCheckbox.checked = true;
+
+      // Clear the summary-analysis element
       document.getElementById("summary-analysis").innerHTML = '';
+
+      // Get the input value and convert it to a JSON string
       const input = document.getElementById("input").value;
-      const data = JSON.stringify({ text: input });
+      const data = JSON.stringify({
+          text: input
+      });
+
+      // Count the number of words in the input and log it to the console
       const words = input.split(/\s+/).length;
       console.log(words);
+
+      // Check if the abstractCheckbox is checked and the number of words is greater than 800
       var abstractSummarize = document.getElementById("abstractCheckbox").checked;
-      if(words>800){
-			 if (abstractCheckbox.checked) {
-			  abstractCheckbox.click();
-       }
-        abstractSummarize=false;
+      if (words > 800) {
+          // If the abstractCheckbox is checked, uncheck it and set abstractSummarize to false
+          if (abstractCheckbox.checked) {
+              abstractCheckbox.click();
+          }
+          abstractSummarize = false;
       }
+
+      // Set the URL based on the value of the abstractSummarize variable
       var url = ''
       if (abstractSummarize) {
-      const numMin = document.getElementById("min-length").value;
-      const numMax = document.getElementById("max-length").value;
-       url = `http://localhost:5000/abstract?min_length=${numMin}&max_length=${numMax}`;
-    }else{
-      const numSentences = document.getElementById("num-sentences").value;
-       url = `http://localhost:5000/summarize?num_sentences=${numSentences}`;
-    } 
+          // If abstractSummarize is true, get the values of min-length and max-length and use them in the URL
+          const numMin = document.getElementById("min-length").value;
+          const numMax = document.getElementById("max-length").value;
+          url = `http://localhost:5000/abstract?min_length=${numMin}&max_length=${numMax}`;
+      } else {
+          // If abstractSummarize is false, get the value of num-sentences and use it in the URL
+          const numSentences = document.getElementById("num-sentences").value;
+          url = `http://localhost:5000/summarize?num_sentences=${numSentences}`;
+      }
+
+      // Create a new XMLHttpRequest object
       const xhr = new XMLHttpRequest();
+
+      // Open a POST request with the specified URL
       xhr.open("POST", url);
+
+      // Set the content type of the request to JSON
       xhr.setRequestHeader("Content-Type", "application/json");
-      xhr.onload = function () {
-        if (xhr.status === 200) {
-          const response = JSON.parse(xhr.responseText);
-          console.log(response.summary);
-          const summ = response.summary;
-          const summary = summ.replace("\\n", "\n").replace(/^"/, "");
-          document.getElementById("summary").innerText = summary.trim();
-          const word_count = summary.split(/\s+/).length;
-          const sentence_count = summary.split(/[.?!]+/).filter(Boolean).length;
-          const input_word_count = input.split(" ").length;
-          const percent_reduction = Math.round((1 - word_count / input_word_count) * 100);
-          document.getElementById("summary-count").innerHTML = `(${word_count} words, ${sentence_count} sentences, Text reduced by ${percent_reduction}% (${input_word_count} to ${word_count}))<br><br><br>`;
-        } else {
+
+      // Handle the response when the request loads
+      xhr.onload = function() {
+          if (xhr.status === 200) {
+              // Parse the JSON response and get the summary text
+              const response = JSON.parse(xhr.responseText);
+              console.log(response.summary);
+              const summ = response.summary;
+
+              // Replace '\n' and '"' characters in the summary text and set it as the inner text of the summary element
+              const summary = summ.replace("\\n", "\n").replace(/^"/, "");
+              document.getElementById("summary").innerText = summary.trim();
+
+              // Count the number of words and sentences in the summary and the input, and calculate the percent reduction
+              const word_count = summary.split(/\s+/).length;
+              const sentence_count = summary.split(/[.?!]+/).filter(Boolean).length;
+              const input_word_count = input.split(" ").length;
+              const percent_reduction = Math.round((1 - word_count / input_word_count) * 100);
+
+              // Set the summary count element with the word count, sentence count, and percent reduction
+              document.getElementById("summary-count").innerHTML = `(${word_count} words, ${sentence_count} sentences, Text reduced by ${percent_reduction}% (${input_word_count} to ${word_count}))<br><br><br>`;
+          } else {
+              // Log an error message to the console if the request fails
+              console.error("Error:", xhr.statusText);
+          }
+      };
+
+      // Handle the error when the request fails
+      xhr.onerror = function() {
           console.error("Error:", xhr.statusText);
-        }
       };
-      xhr.onerror = function () {
-        console.error("Error:", xhr.statusText);
-      };
-     xhr.send(data);
-    }
-    
-    
-    function count() {
+      xhr.send(data);
+  }
+
+
+  function count() {
       const input = document.getElementById("input").value;
       const word_count = input.split(" ").length;
       const sentence_count = input.split(/[.?!]+/).filter(Boolean).length;
       const numLines = input.split("\n").length;
       document.getElementById("word-count").innerHTML = `(${word_count} words, ${sentence_count} sentences, ${numLines} lines)`;
-  
+
       // Get the input element and the maximum number of sentences allowed
       const inputElement = document.getElementById("input");
       const maxSentences = sentence_count;
-  
+
       // Check if the input value is greater than the maximum number of sentences
       if (inputElement.value.split(/[.?!]+/).filter(Boolean).length > maxSentences) {
           // If it is, truncate the input value to only include the first 'maxSentences' sentences
           const truncatedInput = inputElement.value.split(/[.?!]+/).filter(Boolean).slice(0, maxSentences).join("");
           inputElement.value = truncatedInput;
       }
-  
+
       // Set the max attribute of the num-sentences input element to the maximum number of sentences allowed
       document.getElementById("num-sentences").max = maxSentences;
       document.getElementById("max-length").max = maxSentences;
-      document.getElementById("min-length").max = maxSentences-1;
+      document.getElementById("min-length").max = maxSentences - 1;
   }
-  
+
 
   document.addEventListener("mouseup", function(event) {
-    // Check if the mouse click was a left button click and there is selected text
-    var selectedText = window.getSelection().toString().trim();
-    if (event.button === 0 && selectedText !== "" && highlight) {
-      // Set the value of an input box to the selected text
-      document.getElementById("input").value = selectedText;
-      count();
-  
-      // get the checkbox value
-      var advancedSummarize = document.getElementById("advancedCheckbox").checked;
-  
-      // summarize the page content using the appropriate function
-      if (advancedSummarize) {
-        console.log('local');
-        localSummarize();
-      } else {
-        console.log('cloud');
-        summarize();
+      // Check if the mouse click was a left button click and there is selected text
+      var selectedText = window.getSelection().toString().trim();
+      if (event.button === 0 && selectedText !== "" && highlight) {
+          // Set the value of an input box to the selected text
+          document.getElementById("input").value = selectedText;
+          count();
+
+          // get the checkbox value
+          var advancedSummarize = document.getElementById("advancedCheckbox").checked;
+
+          // summarize the page content using the appropriate function
+          if (advancedSummarize) {
+              console.log('local');
+              localSummarize();
+          } else {
+              console.log('cloud');
+              summarize();
+          }
       }
-    }
   });
-   let isNoteOpen = false; // Add this line to initialize the variable
+  let isNoteOpen = false; // Add this line to initialize the variable
   let currentStickyNote = null; // Initialize variable to store the current sticky note
   var resizeLabel = document.createElement('label');
   resizeLabel.classList.add('resizeLabel');
   resizeLabel.textContent = 'Press Esc when done resizing';
   var stickyNoteBtnHandler = function() {
-  if (currentStickyNote === null) { // Check if there's already a sticky note
-    var stickyNote = document.createElement('div'); // create a div element
-    stickyNote.classList.add('stickyNote');
-    var closeBtn = document.createElement('span');
-    closeBtn.classList.add('close');
-    closeBtn.innerHTML = '&times;';
-    var content = document.createElement('div'); // create a new div element for the summary
-    stickyNote.appendChild(closeBtn);
-    stickyNote.appendChild(content); // add the new div element to the sticky note
-    get();
-    document.body.appendChild(stickyNote);
+      if (currentStickyNote === null) { // Check if there's already a sticky note
+          var stickyNote = document.createElement('div'); // create a div element
+          stickyNote.classList.add('stickyNote');
+          var closeBtn = document.createElement('span');
+          closeBtn.classList.add('close');
+          closeBtn.innerHTML = '&times;';
+          var content = document.createElement('div'); // create a new div element for the summary
+          stickyNote.appendChild(closeBtn);
+          stickyNote.appendChild(content); // add the new div element to the sticky note
+          get();
+          document.body.appendChild(stickyNote);
 
-    currentStickyNote = stickyNote; // Update the current sticky note
+          currentStickyNote = stickyNote; // Update the current sticky note
 
-    // Add event listeners to make the sticky note movable
-    let isDragging = false;
-    let offset = [0,0];
-    let canMove = true;
+          // Add event listeners to make the sticky note movable
+          // Initialize variables to track dragging and offset
+          let isDragging = false;
+          let offset = [0, 0];
+          let canMove = true;
 
-    function startDragging(e) {
-      if (canMove) {
-        isDragging = true;
-        offset = [
-          stickyNote.offsetLeft - e.clientX,
-          stickyNote.offsetTop - e.clientY
-        ];
-      }
-    }
-
-    function stopDragging() {
-      isDragging = false;
-    }
-
-    function moveStickyNote(e) {
-      e.preventDefault();
-      if (isDragging) {
-        stickyNote.style.left = (e.clientX + offset[0]) + 'px';
-        stickyNote.style.top = (e.clientY + offset[1]) + 'px';
-      }
-    }
-    
-    function resizeStickyNote(e) {
-      if (!canMove) {
-        stickyNote.appendChild(resizeLabel);
-        var mouseX = e.clientX;
-        var mouseY = e.clientY;
-        var stickyNoteX = stickyNote.offsetLeft;
-        var stickyNoteY = stickyNote.offsetTop;
-        var newWidth = mouseX - stickyNoteX;
-        var newHeight = mouseY - stickyNoteY;
-        stickyNote.style.width = newWidth + 'px';
-        stickyNote.style.height = newHeight + 'px';
-        resizeContent();
-      }
-    }
-    
-
-   function resizeContent() {
-    content.style.width = (stickyNote.offsetWidth - 30) + 'px';
-    content.style.height = (stickyNote.offsetHeight - 40) + 'px';
-  }
-
-function get() {
-  var url = 'http://localhost:5000/get_summaries';
-
-  fetch(url)
-    .then(response => response.json()) // parse the response as JSON
-    .then(data => {
-      var summaryTextArray = data.map((summary, index) => {
-        var summaryText = document.createElement('div');
-        summaryText.classList.add('summary-text');
-        summaryText.textContent = summary;
-        
-        var copyBtn = document.createElement('button');
-        copyBtn.classList.add('Sbtn');
-        copyBtn.textContent = 'Copy';
-        copyBtn.addEventListener('click', function() {
-          // Get the text within the summary element
-          var text = summaryText.textContent;
-          
-          // Remove the first 4 characters from the text
-          text = text.substring(4);
-
-          // Create a temporary textarea element to hold the text
-          var tempTextarea = document.createElement("textarea");
-          tempTextarea.value = text;
-          document.body.appendChild(tempTextarea);
-
-          // Copy the text from the temporary textarea to the clipboard
-          tempTextarea.select();
-          document.execCommand("copy");
-
-          // Remove the temporary textarea
-          document.body.removeChild(tempTextarea);
-        });
-        
-        var removeBtn = document.createElement('button');
-        removeBtn.classList.add('Sbtn');
-        removeBtn.textContent = 'Remove';
-        removeBtn.addEventListener('click', function() {
-          deleteSummary(index);
-        });
-        
-        var buttonWrapper = document.createElement('div');
-        buttonWrapper.classList.add('button-wrapper');
-        buttonWrapper.appendChild(copyBtn);
-        buttonWrapper.appendChild(removeBtn);
-        
-        var summaryWrapper = document.createElement('div');
-        summaryWrapper.classList.add('summary-wrapper');
-        summaryWrapper.appendChild(buttonWrapper);
-        summaryWrapper.appendChild(summaryText);
-        
-        return summaryWrapper;
-      });
-      
-      var wrapperDiv = document.createElement('div');
-      wrapperDiv.classList.add('summary-wrapper');
-      summaryTextArray.forEach((summaryText, index) => {
-        summaryText.classList.add('summary-text'); // Add this line to set the display property
-        
-        wrapperDiv.appendChild(summaryText);
-
-        // Add a <br> element after each summaryWrapper except for the last one
-        if (index < summaryTextArray.length - 1) {
-          var br = document.createElement('br');
-          wrapperDiv.appendChild(br);
-        }
-      });
-      content.appendChild(wrapperDiv);
-    })
-    .catch(error => console.error(error));
-}
-
-
-    stickyNote.addEventListener('mousedown', startDragging);
-    document.addEventListener('mouseup', stopDragging);
-    document.addEventListener('mousemove', moveStickyNote);
-    document.addEventListener('mousemove', resizeStickyNote);
-    document.addEventListener('mouseup', resizeContent);
-
-    closeBtn.addEventListener('click', function removeStickyNote() {
-			toggleNote();
-      document.body.removeChild(stickyNote);
-      closeBtn.removeEventListener('click', removeStickyNote);
-      currentStickyNote = null; // Reset the current sticky note
-    });
-
-    // Add move button to the sticky note
-    var moveBtn = document.createElement('button');
-    moveBtn.classList.add('move');
-    moveBtn.textContent = 'Resize';
-    stickyNote.appendChild(moveBtn);
-
-    moveBtn.addEventListener('mousedown', function(e) {
-      e.stopPropagation();
-      canMove = !canMove;
-      if (canMove) {
-        moveBtn.classList.add('active');
-        stickyNote.addEventListener('mousedown', startDragging);
-        document.addEventListener('mouseup', stopDragging);
-        document.addEventListener('mousemove', moveStickyNote);
-        document.removeEventListener('mousemove', resizeStickyNote);
-        document.removeEventListener('mouseup', resizeContent);
-      } else {
-        moveBtn.classList.remove('active');
-        stickyNote.removeEventListener('mousedown', startDragging);
-        document.removeEventListener('mouseup', stopDragging);
-        document.removeEventListener('mousemove', moveStickyNote);
-        document.addEventListener('mousemove', resizeStickyNote);
-        document.addEventListener('mouseup', resizeContent);
-        }
-        });
-    document.addEventListener('keydown', function(e) {
-      if (e.keyCode === 27) {
-        canMove = true;
-        moveBtn.classList.add('active');
-        if (stickyNote.contains(resizeLabel)) {
-          stickyNote.removeChild(resizeLabel);
-        } 
-        stickyNote.addEventListener('mousedown', startDragging);
-        document.addEventListener('mouseup', stopDragging);
-        document.addEventListener('mousemove', moveStickyNote);
-        document.removeEventListener('mousemove', resizeStickyNote);
-        document.removeEventListener('mouseup', resizeContent);
-      }
-    });
-    
-    document.addEventListener('resize', function() {
-      resizeContent();
-    });
-
-    currentStickyNote = stickyNote; // Update the current sticky note
-		}else {
-    // Close the existing sticky note
-    document.body.removeChild(currentStickyNote);
-    currentStickyNote = null;
-  }
-  
-}
-
-  window.addEventListener('load',function () {
-      var url = 'http://localhost:5000/get_note';
-      fetch(url)
-        .then(response => response.json()) // parse the response as JSON
-        .then(data => {
-          console.log('get '+ data);
-          isNoteOpen = !!data; // convert the data to a boolean value and set isNoteOpen to it
-          if(isNoteOpen){
-             stickyNoteBtnHandler(); // Call the function if isNoteOpen is true
+          // Function to start dragging the sticky note when clicked
+          function startDragging(e) {
+              if (canMove) {
+                  isDragging = true;
+                  // Calculate the offset between the mouse and the top-left corner of the sticky note
+                  offset = [
+                      stickyNote.offsetLeft - e.clientX,
+                      stickyNote.offsetTop - e.clientY
+                  ];
+              }
           }
-        })
-        .catch(error => console.error(error));
-  });
-  
-  function toggleNote() {
-    isNoteOpen = !isNoteOpen;
-    console.log('what the new value should be ' + !!isNoteOpen)
-    var postData = JSON.stringify({});
-    var postOptions = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: postData
-    };
-    fetch('http://localhost:5000/toggle_note', postOptions)
-      .then(response => response.text())
-      .then(data => console.log('toggle '+ data))
-      .catch(error => console.error(error));
+
+          // Function to stop dragging the sticky note when mouse button is released
+          function stopDragging() {
+              isDragging = false;
+          }
+
+          // Function to move the sticky note while dragging
+          function moveStickyNote(e) {
+              e.preventDefault();
+              if (isDragging) {
+                  // Move the sticky note based on the offset and the current mouse position
+                  stickyNote.style.left = (e.clientX + offset[0]) + 'px';
+                  stickyNote.style.top = (e.clientY + offset[1]) + 'px';
+              }
+          }
+
+          // Function to resize the sticky note when the resize label is clicked
+          function resizeStickyNote(e) {
+              if (!canMove) {
+                  // Add the resize label to the sticky note
+                  stickyNote.appendChild(resizeLabel);
+                  // Calculate the new width and height of the sticky note based on the current mouse position
+                  var mouseX = e.clientX;
+                  var mouseY = e.clientY;
+                  var stickyNoteX = stickyNote.offsetLeft;
+                  var stickyNoteY = stickyNote.offsetTop;
+                  var newWidth = mouseX - stickyNoteX;
+                  var newHeight = mouseY - stickyNoteY;
+                  // Set the new width and height of the sticky note
+                  stickyNote.style.width = newWidth + 'px';
+                  stickyNote.style.height = newHeight + 'px';
+                  // Resize the content inside the sticky note to fit the new dimensions
+                  resizeContent();
+              }
+          }
+
+          // Function to resize the content inside the sticky note
+          function resizeContent() {
+              // Set the width and height of the content to be slightly smaller than the sticky note
+              content.style.width = (stickyNote.offsetWidth - 30) + 'px';
+              content.style.height = (stickyNote.offsetHeight - 40) + 'px';
+          }
+
+          function get() {
+              var url = 'http://localhost:5000/get_summaries';
+
+              fetch(url)
+                  .then(response => response.json()) // parse the response as JSON
+                  .then(data => {
+                      var summaryTextArray = data.map((summary, index) => {
+                          var summaryText = document.createElement('div');
+                          summaryText.classList.add('summary-text');
+                          summaryText.textContent = summary;
+
+                          var copyBtn = document.createElement('button');
+                          copyBtn.classList.add('Sbtn');
+                          copyBtn.textContent = 'Copy';
+                          copyBtn.addEventListener('click', function() {
+                              // Get the text within the summary element
+                              var text = summaryText.textContent;
+
+                              // Remove the first 4 characters from the text
+                              text = text.substring(4);
+
+                              // Create a temporary textarea element to hold the text
+                              var tempTextarea = document.createElement("textarea");
+                              tempTextarea.value = text;
+                              document.body.appendChild(tempTextarea);
+
+                              // Copy the text from the temporary textarea to the clipboard
+                              tempTextarea.select();
+                              document.execCommand("copy");
+
+                              // Remove the temporary textarea
+                              document.body.removeChild(tempTextarea);
+                          });
+
+                          var removeBtn = document.createElement('button');
+                          removeBtn.classList.add('Sbtn');
+                          removeBtn.textContent = 'Remove';
+                          removeBtn.addEventListener('click', function() {
+                              deleteSummary(index);
+                          });
+
+                          var buttonWrapper = document.createElement('div');
+                          buttonWrapper.classList.add('button-wrapper');
+                          buttonWrapper.appendChild(copyBtn);
+                          buttonWrapper.appendChild(removeBtn);
+
+                          var summaryWrapper = document.createElement('div');
+                          summaryWrapper.classList.add('summary-wrapper');
+                          summaryWrapper.appendChild(buttonWrapper);
+                          summaryWrapper.appendChild(summaryText);
+
+                          return summaryWrapper;
+                      });
+
+                      var wrapperDiv = document.createElement('div');
+                      wrapperDiv.classList.add('summary-wrapper');
+                      summaryTextArray.forEach((summaryText, index) => {
+                          summaryText.classList.add('summary-text'); // Add this line to set the display property
+
+                          wrapperDiv.appendChild(summaryText);
+
+                          // Add a <br> element after each summaryWrapper except for the last one
+                          if (index < summaryTextArray.length - 1) {
+                              var br = document.createElement('br');
+                              wrapperDiv.appendChild(br);
+                          }
+                      });
+                      content.appendChild(wrapperDiv);
+                  })
+                  .catch(error => console.error(error));
+          }
+
+
+          // Add event listener to start dragging the sticky note
+          stickyNote.addEventListener('mousedown', startDragging);
+
+          // Add event listener to stop dragging the sticky note
+          document.addEventListener('mouseup', stopDragging);
+
+          // Add event listener to move the sticky note
+          document.addEventListener('mousemove', moveStickyNote);
+
+          // Add event listener to resize the sticky note
+          document.addEventListener('mousemove', resizeStickyNote);
+
+          // Add event listener to stop resizing the sticky note
+          document.addEventListener('mouseup', resizeContent);
+
+          // Add event listener to remove the sticky note on click
+          closeBtn.addEventListener('click', function removeStickyNote() {
+              toggleNote();
+              document.body.removeChild(stickyNote);
+              closeBtn.removeEventListener('click', removeStickyNote);
+              currentStickyNote = null; // Reset the current sticky note
+          });
+
+          // Add move button to the sticky note
+          var moveBtn = document.createElement('button');
+          moveBtn.classList.add('move');
+          moveBtn.textContent = 'Resize';
+          stickyNote.appendChild(moveBtn);
+
+          // Add event listener to start moving the sticky note on click
+          moveBtn.addEventListener('mousedown', function(e) {
+              e.stopPropagation();
+              canMove = !canMove;
+              if (canMove) {
+                  moveBtn.classList.add('active');
+                  stickyNote.addEventListener('mousedown', startDragging);
+                  document.addEventListener('mouseup', stopDragging);
+                  document.addEventListener('mousemove', moveStickyNote);
+                  document.removeEventListener('mousemove', resizeStickyNote);
+                  document.removeEventListener('mouseup', resizeContent);
+              } else {
+                  moveBtn.classList.remove('active');
+                  stickyNote.removeEventListener('mousedown', startDragging);
+                  document.removeEventListener('mouseup', stopDragging);
+                  document.removeEventListener('mousemove', moveStickyNote);
+                  document.addEventListener('mousemove', resizeStickyNote);
+                  document.addEventListener('mouseup', resizeContent);
+              }
+          });
+
+          // Add event listener to close the sticky note on Escape key press
+          document.addEventListener('keydown', function(e) {
+              if (e.keyCode === 27) {
+                  canMove = true;
+                  moveBtn.classList.add('active');
+                  if (stickyNote.contains(resizeLabel)) {
+                      stickyNote.removeChild(resizeLabel);
+                  }
+                  stickyNote.addEventListener('mousedown', startDragging);
+                  document.addEventListener('mouseup', stopDragging);
+                  document.addEventListener('mousemove', moveStickyNote);
+                  document.removeEventListener('mousemove', resizeStickyNote);
+                  document.removeEventListener('mouseup', resizeContent);
+              }
+          });
+
+          // Add event listener to resize the sticky note on window resize
+          document.addEventListener('resize', function() {
+              resizeContent();
+          });
+
+          currentStickyNote = stickyNote; // Update the current sticky note
+      } else {
+          // Close the existing sticky note
+          document.body.removeChild(currentStickyNote);
+          currentStickyNote = null;
+      }
+
   }
 
-    function deleteSummary(index) {
-      var url = "http://localhost:5000/delete_summary";
-      var data = { index: index };
-      var options = {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
-      };
-      fetch(url, options)
-        .then(response => response.json())
-        .then(data => {
-          console.log(data.message);
-        document.body.removeChild(currentStickyNote);
-    		currentStickyNote = null;
-        stickyNoteBtnHandler();
+  /*
+This code loads a sticky note application when the window is fully loaded,
+fetches data from a URL and toggles the note open or closed when the button is clicked.
+It also contains a function to delete a summary, which is called when the note is closed.
+*/
 
-        })
-        .catch(error => console.error(error));
-    }
-
-
-  
-  stickyNoteBtn.addEventListener('click', function(){
-    stickyNoteBtnHandler();
-    toggleNote();
-
+  window.addEventListener('load', function() {
+      var url = 'http://localhost:5000/get_note';
+      // fetch data from the specified URL
+      fetch(url)
+          .then(response => response.json()) // parse the response as JSON
+          .then(data => {
+              console.log('get ' + data);
+              isNoteOpen = !!data; // convert the data to a boolean value and set isNoteOpen to it
+              if (isNoteOpen) {
+                  stickyNoteBtnHandler(); // Call the function if isNoteOpen is true
+              }
+          })
+          .catch(error => console.error(error));
   });
 
-    
+  function toggleNote() {
+      // toggle the value of isNoteOpen
+      isNoteOpen = !isNoteOpen;
+      console.log('what the new value should be ' + !!isNoteOpen)
+      var postData = JSON.stringify({});
+      var postOptions = {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json'
+          },
+          body: postData
+      };
+      // send a POST request to the specified URL with the postOptions
+      fetch('http://localhost:5000/toggle_note', postOptions)
+          .then(response => response.text())
+          .then(data => console.log('toggle ' + data))
+          .catch(error => console.error(error));
+  }
+
+  function deleteSummary(index) {
+      var url = "http://localhost:5000/delete_summary";
+      var data = {
+          index: index
+      };
+      var options = {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json"
+          },
+          body: JSON.stringify(data)
+      };
+      // send a POST request to the specified URL with the options
+      fetch(url, options)
+          .then(response => response.json())
+          .then(data => {
+              console.log(data.message);
+              // remove the current sticky note from the document body and reset the currentStickyNote variable
+              document.body.removeChild(currentStickyNote);
+              currentStickyNote = null;
+              // call the stickyNoteBtnHandler function
+              stickyNoteBtnHandler();
+          })
+          .catch(error => console.error(error));
+  }
+
+  // add a click event listener to the stickyNoteBtn that calls the stickyNoteBtnHandler and toggleNote functions
+  stickyNoteBtn.addEventListener('click', function() {
+      stickyNoteBtnHandler();
+      toggleNote();
+  });
+
+  // close the function call
 })();
