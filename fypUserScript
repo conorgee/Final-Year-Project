@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         FYP
+// @name         FYP 
 // @description  Adds a collapsible side panel to web pages
 // @match        http://*/*
 // @match        https://*/*
@@ -956,16 +956,13 @@
           currentStickyNote = stickyNote; // Update the current sticky note
 
           // Add event listeners to make the sticky note movable
-          // Initialize variables to track dragging and offset
           let isDragging = false;
           let offset = [0, 0];
           let canMove = true;
 
-          // Function to start dragging the sticky note when clicked
           function startDragging(e) {
               if (canMove) {
                   isDragging = true;
-                  // Calculate the offset between the mouse and the top-left corner of the sticky note
                   offset = [
                       stickyNote.offsetLeft - e.clientX,
                       stickyNote.offsetTop - e.clientY
@@ -973,44 +970,35 @@
               }
           }
 
-          // Function to stop dragging the sticky note when mouse button is released
           function stopDragging() {
               isDragging = false;
           }
 
-          // Function to move the sticky note while dragging
           function moveStickyNote(e) {
               e.preventDefault();
               if (isDragging) {
-                  // Move the sticky note based on the offset and the current mouse position
                   stickyNote.style.left = (e.clientX + offset[0]) + 'px';
                   stickyNote.style.top = (e.clientY + offset[1]) + 'px';
               }
           }
 
-          // Function to resize the sticky note when the resize label is clicked
           function resizeStickyNote(e) {
               if (!canMove) {
-                  // Add the resize label to the sticky note
                   stickyNote.appendChild(resizeLabel);
-                  // Calculate the new width and height of the sticky note based on the current mouse position
                   var mouseX = e.clientX;
                   var mouseY = e.clientY;
                   var stickyNoteX = stickyNote.offsetLeft;
                   var stickyNoteY = stickyNote.offsetTop;
                   var newWidth = mouseX - stickyNoteX;
                   var newHeight = mouseY - stickyNoteY;
-                  // Set the new width and height of the sticky note
                   stickyNote.style.width = newWidth + 'px';
                   stickyNote.style.height = newHeight + 'px';
-                  // Resize the content inside the sticky note to fit the new dimensions
                   resizeContent();
               }
           }
 
-          // Function to resize the content inside the sticky note
+
           function resizeContent() {
-              // Set the width and height of the content to be slightly smaller than the sticky note
               content.style.width = (stickyNote.offsetWidth - 30) + 'px';
               content.style.height = (stickyNote.offsetHeight - 40) + 'px';
           }
