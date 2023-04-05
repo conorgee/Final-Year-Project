@@ -82,9 +82,9 @@
   var maxInput = document.createElement("input");
   maxInput.type = "number";
   maxInput.id = "max-length";
-  maxInput.min = "10";
+  maxInput.min = "30";
   maxInput.max = "800";
-  maxInput.value = "10";
+  maxInput.value = "30";
   maxInput.classList.add('inp');
   maxInput.oninput = function() {
       // Cap the maximum value at 800
@@ -532,6 +532,8 @@
       flex-direction: column; /* Set the flex direction to column */
       flex: 1; /* Set the flex value to 1 */
       margin-right: 10px; /* Add a margin of 10px at the right */
+      padding: 20px; /* Add 5px of padding */
+
     }
 
     /* Styling for the label */
@@ -592,7 +594,7 @@
       wrapper.classList.add("side-panel-open");
       // Set the button's transition and right position
       button.style.transition = "right 0.3s ease-in-out";
-      button.style.right = "calc(400px)";
+      button.style.right = "calc(410px)";
       // Remove the open event listener from the button
       button.removeEventListener('click', openNav);
       // Add a close event listener to the button

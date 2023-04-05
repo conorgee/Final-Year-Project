@@ -90,7 +90,7 @@ def abstract():
     text = data["text"]
     word_count = len(text.split())
     min_lengthh = int(request.args.get("min_length", 1))
-    max_lengthh = int(request.args.get("max_length", 10))
+    max_lengthh = int(request.args.get("max_length", 30))
     # Load the T5 tokenizer
     tokenizer = AutoTokenizer.from_pretrained("t5-base")
     # Encode the input text using the tokenizer
@@ -104,34 +104,25 @@ def abstract():
     if max_lengthh > word_count:
         max_lengthh = word_count
     # Split the text into smaller sequences of length 500 if it exceeds sequence length 500
-    if seq_length > 500:
-        # Split text into sequences of length 500
-        text_sequences = textwrap.wrap(text, width=500)
+    # Split text into sequences of length 500
+    text_sequences = [text[i:i+500] for i in range(0, len(text), 500)]
         # Initialize a list to store the summaries
-        summariess = []
-        # Loop through each sequence
-        for sequence in text_sequences:
-            # Tokenize the sequence using the T5 tokenizer
-            encoded = tokenizer.encode(sequence, add_special_tokens=True)
-            # Compute the min/max length for the summary
-            max = round((2 + len(encoded)) * (max_lengthh / word_count))
-            min = round((2 + len(encoded)) * (min_lengthh / word_count))
-            # Generate the summary using the T5 summarization pipeline
-            summary = abstractSum(sequence, min_length=min, max_length=max)[0][
-                "summary_text"
-            ]
-            summariess.append(summary)
+    summariess = []
+    # Loop through each sequence
+    for sequence in text_sequences:
+        # Tokenize the sequence using the T5 tokenizer
+        encoded = tokenizer.encode(sequence, add_special_tokens=True)
+        # Compute the min/max length for the summary
+        max = round((2 + len(encoded)) * (max_lengthh / word_count))
+        min = round((2 + len(encoded)) * (min_lengthh / word_count))
+        # Generate the summary using the T5 summarization pipeline
+        summary = abstractSum(sequence, min_length=min, max_length=max)[0][
+            "summary_text"
+        ]
+        summariess.append(summary)
 
-        # Concatenate the summaries
-        summary = " ".join(summariess)
-    else:
-        # Generate a summary for the whole text using the T5 summarization pipeline
-        summary = abstractSum(
-            text,
-            min_length=round(seq_length * (min_lengthh / word_count)),
-            max_length=round(seq_length * (max_lengthh / word_count)),
-        )[0]["summary_text"]
-
+    # Concatenate the summaries
+    summary = " ".join(summariess)
     # Return the summary as a JSON response
     return jsonify({"summary": summary})
 
