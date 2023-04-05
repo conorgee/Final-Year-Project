@@ -132,8 +132,6 @@ def abstract():
             max_length=round(seq_length * (max_lengthh / word_count)),
         )[0]["summary_text"]
 
-    # Store the summary in the global variable
-    summaries.append(summary)
     # Return the summary as a JSON response
     return jsonify({"summary": summary})
 
